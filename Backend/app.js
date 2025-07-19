@@ -11,6 +11,7 @@ const cors = require("cors");
 
 const userRoutes = require('./Routes/user.routes');
 const captainRoutes= require('./Routes/captain.routes');
+const mapsRoutes= require('./Routes/maps.routes')
 
 const connectToDb= require('./db/db');
 connectToDb(); // 🔗 DB connects now
@@ -19,6 +20,8 @@ app.use(cors());
 app.use(express.json());
 app.use('/users', userRoutes);
 app.use('/captains',captainRoutes);
+app.use('/maps',mapsRoutes);
+
 
 
 app.use(express.urlencoded({ extended: true }));
