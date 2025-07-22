@@ -5,7 +5,7 @@ const VehiclePanel = (props) => {
     <div>
       <h5
         onClick={() => {
-          props.setVehiclePanel(false)
+          props.setVehiclePanel(false);
         }}
         className="absolute top-0 left-0 w-full bg-transparent text-2xl font-bold flex justify-center items-center py-2"
       >
@@ -16,7 +16,8 @@ const VehiclePanel = (props) => {
 
       <div
         onClick={() => {
-          props.setConfirmRidePanel(true);
+          props.setConfirmRidePanel(true),
+          props.selectVehicle("car"); 
         }}
         className="flex my-2 items-center border-transparent bg-gray-200 active:border-black border-2 rounded-xl p-3 justify-between "
       >
@@ -32,12 +33,13 @@ const VehiclePanel = (props) => {
           <h5 className="font-medium text-sm">2 mins away!</h5>
           <p className="font-medium text-sm">affordable compact ride</p>
         </div>
-        <h2 className="text-2xl font-semibold">₹193.2</h2>
+        <h2 className="text-2xl font-semibold">₹{props.fare?.car}</h2>
       </div>
 
       <div
         onClick={() => {
-          props.setConfirmRidePanel(true)
+          props.setConfirmRidePanel(true);
+          props.selectVehicle("auto"); 
         }}
         className="flex border-transparent active:border-black border-2 rounded-xl bg-gray-200 p-3 justify-between "
       >
@@ -53,20 +55,22 @@ const VehiclePanel = (props) => {
           <h5 className="font-medium text-sm">2 mins away!</h5>
           <p className="font-medium text-sm">affordable compact ride</p>
         </div>
-        <h2 className="text-2xl font-semibold">₹193.2</h2>
+        <h2 className="text-2xl font-semibold">₹{props.fare?.auto}</h2>
       </div>
 
       <div
         onClick={() => {
-          props.setConfirmRidePanel(true)
+          props.setConfirmRidePanel(true);
+          props.selectVehicle("moto"); 
         }}
-        className="flex my-2 border-transparent active:border-black border-2 bg-gray-200 rounded-xl p-3 justify-between"
+        className="flex mt-2 border-transparent active:border-black border-2 bg-gray-200 rounded-xl p-3 justify-between"
       >
         <img
-          className="h-16"
+          className="h-16  scale-x-[-1]"
           src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_638,w_956/v1649231091/assets/2c/7fa194-c954-49b2-9c6d-a3b8601370f5/original/Uber_Moto_Orange_312x208_pixels_Mobile.png"
           alt=""
         />
+
         <div className="w-1/2">
           <h4 className="font-medium text-sm ">
             UBERgo <i className="ri-user-fill"></i>
@@ -74,7 +78,7 @@ const VehiclePanel = (props) => {
           <h5 className="font-medium text-sm">2 mins away!</h5>
           <p className="font-medium text-sm">affordable compact ride</p>
         </div>
-        <h2 className="text-2xl font-semibold">₹193.2</h2>
+        <h2 className="text-2xl font-semibold">₹{props.fare?.moto}</h2>
       </div>
     </div>
   );
