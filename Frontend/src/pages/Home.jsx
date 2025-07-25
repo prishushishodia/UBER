@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import axios from "axios";
@@ -8,6 +8,8 @@ import VehiclePanel from "../components/VehiclePanel";
 import ConfirmRide from "../components/ConfirmRide";
 import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
+import { SocketContext } from "../context/SocketContext";
+import { UserDataContext } from "../context/userContext";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -28,6 +30,20 @@ const Home = () => {
   const [activeField, setActiveField] = useState(null);
   const [fare, setFare] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
+
+  const { socket } = useContext(SocketContext);
+  const { user } = useContext(UserDataContext);
+
+// Home.jsx
+
+useEffect(() => {
+  // ✅ Add this check!
+  // Only proceed if 'user' is not null and has an '_id'.
+  if (user && user._id) {
+    socket.emit("join", { userType: "user", userId: user._id });
+    console.log("Joining socket room with user:", user);
+  }
+}, [user]); // The dependency array is correct
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
@@ -86,7 +102,6 @@ const Home = () => {
 
     setVehiclePanel(true);
     setPanelOpen(false);
-
 
     console.log(response.data);
   }
@@ -283,11 +298,10 @@ const Home = () => {
           setVehiclePanel={setVehiclePanel}
         />
       </div>
-    <div
-  ref={confirmRidePanelRef}
-  className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
->
-
+      <div
+        ref={confirmRidePanelRef}
+        className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
+      >
         <ConfirmRide
           vehicleType={vehicleType}
           setVehiclePanel={setVehiclePanel}
@@ -303,8 +317,7 @@ const Home = () => {
         ref={vehicleFoundRef}
         className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
-        <LookingForDriver 
-        setVehicleFound={setVehicleFound} />
+        <LookingForDriver setVehicleFound={setVehicleFound} />
       </div>
       <div
         ref={waitingForDriverRef}

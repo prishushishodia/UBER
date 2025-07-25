@@ -1,10 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import CaptainDetails from "../components/CaptainDetails";
 import RidePopUp from "../components/RidePopUp";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
+import { SocketContext } from "../context/SocketContext";
+import { CaptainDataContext } from "../context/CaptainContext";
+
+
+
 
 
 const CaptainHome = () => {
@@ -13,6 +18,47 @@ const CaptainHome = () => {
 
   const ridePopUpPanelRef = useRef(null);
     const confirmRidePopUpRef = useRef(null);
+
+// CaptainHome.jsx
+
+const { socket } = useContext(SocketContext); // ✅ Correct: Destructure the socket
+const { captain } = useContext(CaptainDataContext);
+
+   
+    useEffect(() => {
+        socket.emit('join', {
+            userId: captain._id,
+            userType: 'captain'
+        })
+        const updateLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                  // console.log({
+                  //       userId: captain._id,
+                  //       ltd: position.coords.latitude,
+                  //       lng: position.coords.longitude
+                  //   });
+                  
+
+                    socket.emit('update-location-captain', {
+                        userId: captain._id,
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
+                })
+            }
+        }
+
+        const locationInterval = setInterval(updateLocation, 10000)
+        updateLocation()
+
+        // return () => clearInterval(locationInterval)
+    }, [])
+socket.on('new-ride',(data)=>{
+  console.log(data);
+
+  
+})
 
 
   useGSAP(() => {
@@ -46,7 +92,7 @@ const CaptainHome = () => {
         <div>
           {" "}
           <img
-            className="w-16 absolute  left-5 top-5 scale-180 m-7"
+            className="w-16 absolute  left-5 top-5 scale-[1.8] m-7"
             src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
             alt=""
           />
