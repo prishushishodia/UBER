@@ -24,7 +24,7 @@ const RidePopUp = (props) => {
             src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Rider"
           />
-          <span>Riya singh</span>
+          <span>{props.ride?.user.fullname.firstname} {props.ride?.user.fullname.lastname} </span>
         </div>
         <span className="text-sm font-semibold text-gray-600">2.2 km</span>
       </div>
@@ -38,7 +38,7 @@ const RidePopUp = (props) => {
               Pickup Point
             </h4>
             <p className="text-sm text-gray-500">
-              562/11-A, Kankariya Talab, Bhopal
+              {props.ride?.pickup}
             </p>
           </div>
         </div>
@@ -49,7 +49,7 @@ const RidePopUp = (props) => {
             <h4 className="text-base font-semibold text-gray-800">
               Destination
             </h4>
-            <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+            <p className="text-sm text-gray-500">{props.ride?.destination}</p>
           </div>
         </div>
 
@@ -57,7 +57,7 @@ const RidePopUp = (props) => {
           <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
           <div>
             <h4 className="text-base font-semibold text-gray-800">Fare</h4>
-            <p className="text-sm text-gray-500">₹99</p>
+            <p className="text-sm text-gray-500">₹{props.ride?.fare}</p>
           </div>
         </div>
       </div>
@@ -67,6 +67,7 @@ const RidePopUp = (props) => {
         <button
           onClick={() => {
             props.setConfirmRidePopUpPanel(true);
+            props.confirmRide();
           }}
           className=" bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition"
         >

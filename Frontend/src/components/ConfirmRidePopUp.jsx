@@ -1,21 +1,44 @@
+import axios from "axios";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 const ConfirmRidePopUp = (props) => {
-  const [otp, setOtp] = useState()
+  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
-  const submitHandler=(e)=>{
-e.preventDefault( )
-  }
+  const submitHandler = async (e) => {
+    e.preventDefault();
 
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+        {
+          params: {
+            rideId: props.ride._id,
+            otp: otp,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        props.setConfirmRidePopUpPanel(false);
+        props.setRidePopUpPanel(false);
+        navigate("/captain-riding",{state:{ride:props.ride}});
+      }
+    } catch (error) {
+      console.error("Error starting ride:", error);
+    }
+  };
 
   return (
-    <div className="p-6 rounded-t-3xl bg-white  shadow-2xl relative max-w-md mx-auto">
+    <div className="p-6 rounded-t-3xl bg-white shadow-2xl relative max-w-md mx-auto">
       {/* Close Icon */}
       <button
         onClick={() => props.setConfirmRidePopUpPanel(false)}
-        className="absolute top-4 -translate-y-14  left-1/2 text-2xl text-gray-500 hover:text-black transition"
+        className="absolute top-4 -translate-y-14 left-1/2 text-2xl text-gray-500 hover:text-black transition"
       >
         <i className="ri-arrow-down-wide-line"></i>
       </button>
@@ -30,7 +53,7 @@ e.preventDefault( )
         <div className="flex items-center gap-4">
           <img
             className="h-14 w-14 rounded-full object-cover border border-gray-300"
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0"
             alt="Rider"
           />
           <div className="text-gray-700 font-medium text-base">Riya Singh</div>
@@ -44,11 +67,9 @@ e.preventDefault( )
           <i className="text-xl text-green-600 ri-map-pin-fill"></i>
           <div>
             <div className="text-sm font-semibold text-gray-800">
-              Pickup Point
+              {props.ride?.pickup}
             </div>
-            <p className="text-sm text-gray-500">
-              562/11-B, Kankariya Talab, Bhopal
-            </p>
+            <p className="text-sm text-gray-500">Pickup Point</p>
           </div>
         </div>
 
@@ -56,58 +77,53 @@ e.preventDefault( )
           <i className="text-xl text-blue-600 ri-map-pin-3-line"></i>
           <div>
             <div className="text-sm font-semibold text-gray-800">
-              Destination
+              {props.ride?.destination}
             </div>
-            <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+            <p className="text-sm text-gray-500">Destination</p>
           </div>
         </div>
 
         <div className="flex items-start gap-4 py-4">
           <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
           <div>
-            <div className="text-sm font-semibold text-gray-800">Fare</div>
-            <p className="text-sm text-gray-500">₹99</p>
+            <div className="text-sm font-semibold text-gray-800">
+              ₹{props.ride?.fare}
+            </div>
+            <p className="text-sm text-gray-500">Fare</p>
           </div>
         </div>
       </div>
 
-
+      {/* OTP Form */}
       <div className="mt-6 flex flex-col gap-3">
-   <form
-  onSubmit={(e) => {
-    submitHandler(e);
-  }}
-  className="flex flex-col gap-3 w-full px-6 py-4"
->
-  <input
-  value={otp }
-  onChange={(e)=>{
-    setOtp(e.target.value)
-  }}
-    className="bg-[#eee] px-4 py-2  text-center text-base rounded-lg w-full"
-    type="text"
-    placeholder="Enter OTP"
-  />
+        <form onSubmit={submitHandler} className="flex flex-col gap-3 w-full px-6 py-4">
+          <input
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            className="bg-[#eee] px-4 py-2 text-center text-base rounded-lg w-full"
+            type="text"
+            placeholder="Enter OTP"
+            required
+          />
 
-  <Link
-    to="/captain-riding"
-    className="bg-green-500 hover:bg-green-600 text-center text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
-  >
-    Confirm Ride
-  </Link>
+          <button
+            type="submit"
+            className="bg-green-500 hover:bg-green-600 text-center text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
+          >
+            Confirm Ride
+          </button>
 
-  <button
-    type="button"
-    onClick={() => {
-      props.setRidePopUpPanel(false);
-      props.setConfirmRidePopUpPanel(false);
-    }}
-    className="bg-red-500 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
-  >
-    Reject
-  </button>
-</form>
-
+          <button
+            type="button"
+            onClick={() => {
+              props.setRidePopUpPanel(false);
+              props.setConfirmRidePopUpPanel(false);
+            }}
+            className="bg-red-500 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
+          >
+            Reject
+          </button>
+        </form>
       </div>
     </div>
   );

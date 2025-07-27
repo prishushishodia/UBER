@@ -1,6 +1,8 @@
+const { send } = require("process");
 const rideModel = require("../models/ride.model");
 const mapsService = require("./maps.service");
 const crypto = require("crypto");
+const { sendMessageToSocketId } = require("../socket");
 
 async function getFare(pickup, destination) {
   if (!pickup || !destination) {
@@ -77,3 +79,86 @@ module.exports.createRide = async ({
   });
   return ride;
 };
+
+module.exports.confirmRide = async ({ rideId, captainId }) => {
+  if (!rideId || !captainId) {
+    throw new Error("rideId and captainId are required");
+  }
+
+  // Find the ride, update it, and return the new version in one step
+  const ride = await rideModel.findByIdAndUpdate(
+    rideId, // Use the ID directly
+    {
+      status: "accepted",
+      captain: captainId, // Use the captainId passed into the function
+    },
+    { new: true } // This option tells Mongoose to return the updated document
+  ).populate("user").populate("captain").select("+otp"); // Populate user and captain details
+
+  if (!ride) {
+    throw new Error("Ride not found");
+  }
+
+  return ride;
+};
+
+module.exports.startRide = async ({ rideId, otp, captain }) => {
+  if (!rideId || !otp) {
+    throw new Error('Ride ID and OTP are required');
+  }
+
+  const ride = await rideModel.findOne({ _id: rideId })
+    .populate('user')
+    .populate('captain')
+    .select('+otp');
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  if (ride.status !== 'accepted') {
+    throw new Error('Ride not accepted');
+  }
+
+  if (ride.otp !== otp) {
+    throw new Error('Invalid OTP');
+  }
+
+  await rideModel.findOneAndUpdate(
+    { _id: rideId },
+    { status: 'ongoing' }
+  );
+  sendMessageToSocketId(ride.user.socketId, {
+    event: 'ride-started',
+    data: ride
+  }
+  )
+  return ride;
+};
+
+module.exports.endRide = async ({ rideId, captain }) => {
+  if (!rideId) {
+    throw new Error('Ride ID is required');
+  }
+
+  const ride = await rideModel.findOne({ _id: rideId, captain: captain._id })
+    .populate('user')
+    .populate('captain')
+    .select('+otp');
+
+  if (!ride) {
+    throw new Error('Ride not found');
+  }
+
+  if (ride.status !== 'ongoing') {
+    throw new Error('Ride not ongoing');
+  }
+
+  await rideModel.findOneAndUpdate(
+    { _id: rideId },
+    { status: 'completed' }
+  );
+return ride;
+
+
+}

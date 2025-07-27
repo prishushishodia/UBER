@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { use, useContext, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import axios from "axios";
@@ -10,6 +10,8 @@ import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/userContext";
+import { useNavigate } from "react-router-dom";
+
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -30,6 +32,9 @@ const Home = () => {
   const [activeField, setActiveField] = useState(null);
   const [fare, setFare] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
+  const [ride, setRide] = useState(null)
+
+const navigate= useNavigate();
 
   const { socket } = useContext(SocketContext);
   const { user } = useContext(UserDataContext);
@@ -43,7 +48,26 @@ useEffect(() => {
     socket.emit("join", { userType: "user", userId: user._id });
     console.log("Joining socket room with user:", user);
   }
-}, [user]); // The dependency array is correct
+}, [user]);
+
+useEffect(() => {
+socket.on('ride-started',ride=>{
+  setWaitingForDriver(false)
+  navigate('/riding',{state:{ride}})
+
+})
+})
+
+useEffect(() => {
+  // Ensure the socket is connected before setting up listeners
+    socket.on('ride-confirmed', ride => {
+
+
+        setVehicleFound(false)
+        setWaitingForDriver(true)
+        setRide(ride)
+    })
+}); 
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
@@ -107,6 +131,14 @@ useEffect(() => {
   }
 
   async function createRide() {
+  // ✅ Add this console.log to debug
+  console.log("Sending data to create ride:", {
+    pickup,
+    destination,
+    vehicleType,
+  });
+
+  try {
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/rides/create`,
       {
@@ -120,8 +152,13 @@ useEffect(() => {
         },
       }
     );
+    setRide(response.data);
     console.log(response.data);
+  } catch (error) {
+    // This will log the detailed error response from your backend
+    console.error("Error creating ride:", error.response.data);
   }
+}
 
   useGSAP(
     function () {
@@ -308,6 +345,7 @@ useEffect(() => {
           pickup={pickup}
           destination={destination}
           fare={fare}
+         
           createRide={createRide}
           setConfirmRidePanel={setConfirmRidePanel}
           setVehicleFound={setVehicleFound}
@@ -317,13 +355,19 @@ useEffect(() => {
         ref={vehicleFoundRef}
         className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
-        <LookingForDriver setVehicleFound={setVehicleFound} />
+        <LookingForDriver 
+        ride={ride} 
+        setVehicleFound={setVehicleFound} />
       </div>
       <div
         ref={waitingForDriverRef}
         className="fixed bottom-0  z-10 w-full bg-white px-3 py-12"
       >
-        <WaitingForDriver waitingForDriver={waitingForDriver} />
+        <WaitingForDriver 
+        ride={ride} 
+        setVehicleFound={setVehicleFound} 
+        setWaitingForDriver={setWaitingForDriver}
+        waitingForDriver={waitingForDriver} />
       </div>
     </div>
   );

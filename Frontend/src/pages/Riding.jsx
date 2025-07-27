@@ -1,7 +1,25 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { Link , useLocation, useNavigate} from "react-router-dom";
+import { SocketContext } from "../context/SocketContext";
+
+
 
 const Riding = () => {
+
+  const location= useLocation();
+  const {ride}=location.state||{}
+  const {socket}=useContext(SocketContext);
+  const navigate=useNavigate();
+
+socket.on('ride-ended',()=>{
+  navigate('/home')
+})
+
+
+
+
+
+
   return (
     <div className="h-screen">
          <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
@@ -22,9 +40,9 @@ const Riding = () => {
             <i className="text-xl text-blue-600 ri-map-pin-fill"></i>
             <div>
               <h3 className="text-base font-semibold text-gray-800">
-                562/11-V
+                {ride?.pickup}
               </h3>
-              <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+              <p className="text-sm text-gray-500">Pickup Pointl</p>
             </div>
           </div>
 
@@ -33,9 +51,9 @@ const Riding = () => {
             <i className="text-xl text-green-600 ri-map-pin-3-line"></i>
             <div>
               <h3 className="text-base font-semibold text-gray-800">
-                Destination
+                {ride?.destination}
               </h3>
-              <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+              <p className="text-sm text-gray-500">Destination</p>
             </div>
           </div>
 
@@ -43,11 +61,19 @@ const Riding = () => {
           <div className="flex items-start gap-4 p-4">
             <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-base font-semibold text-gray-800">₹99</h3>
+              <h3 className="text-base font-semibold text-gray-800">₹{ride?.fare}</h3>
               <p className="text-sm text-gray-500">Ride Fare</p>
             </div>
           </div>
         </div>
+
+        {/* {ride&&(
+          <div>
+            <h2>ride ID:{ride._id}</h2>
+            <h2>pickup:{ride.pickup}</h2>
+            <h2>destination:{ride.destination}</h2>
+          </div>
+        )} */}
         <button className="w-full mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg">Make a payment</button>
       </div>
     </div>

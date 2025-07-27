@@ -1,6 +1,9 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+require('./models/user.model');
+require('./models/captain.model');
+require('./models/ride.model');
 const express = require("express");
 const app = express();
 

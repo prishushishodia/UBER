@@ -34,8 +34,8 @@ const LookingForDriver = (props) => {
           <div className="flex items-start gap-4 p-4">
             <i className="text-xl text-blue-600 ri-map-pin-fill"></i>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">562/11-B</h3>
-              <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+              <h3 className="text-base font-semibold text-gray-900">{props.ride?.pickup}</h3>
+              <p className="text-sm text-gray-500">pickup</p>
             </div>
           </div>
 
@@ -43,8 +43,8 @@ const LookingForDriver = (props) => {
           <div className="flex items-start gap-4 p-4">
             <i className="text-xl text-green-600 ri-map-pin-3-line"></i>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">Destination</h3>
-              <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+              <h3 className="text-base font-semibold text-gray-900">{props.ride?.destination}</h3>
+              <p className="text-sm text-gray-500">destination</p>
             </div>
           </div>
 
@@ -52,7 +52,7 @@ const LookingForDriver = (props) => {
           <div className="flex items-start gap-4 p-4">
             <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">₹99</h3>
+              <h3 className="text-base font-semibold text-gray-900">₹{props.ride?.fare}</h3>
               <p className="text-sm text-gray-500">Ride Fare</p>
             </div>
           </div>

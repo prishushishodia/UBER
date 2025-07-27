@@ -2,7 +2,7 @@ require('dotenv').config(); // 🔥 Load env vars before anything
 
 const http = require('http');
 const app = require('./app');
-const initializeSocket = require('./socket');
+const {initializeSocket} = require('./socket');
 
 const port = process.env.PORT || 4000;
 

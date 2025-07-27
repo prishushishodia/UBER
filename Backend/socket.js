@@ -7,7 +7,7 @@ let io;
 function initializeSocket(server) {
   io = socketIo(server, {
     cors: {
-      origin: "*", // You can replace this with your frontend origin
+      origin: "*",
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -20,42 +20,35 @@ function initializeSocket(server) {
       const { userId, userType } = data;
       console.log(`User ${userId} joined as ${userType}`);
 
+      // ✅ This logic is correct, no changes needed
       if (userType === "user") {
-        await userModel.findOneAndUpdate(
-          { _id: userId },
-          { socketId: socket.id }
-        );
+        await userModel.findOneAndUpdate({ _id: userId }, { socketId: socket.id });
       } else if (userType === "captain") {
-        await captainModel.findOneAndUpdate(
-          { _id: userId },
-          { socketId: socket.id }
-        );
+        await captainModel.findOneAndUpdate({ _id: userId }, { socketId: socket.id });
       }
     });
 
-    socket.on("update-location", async (data) => {
-      const { userId, userType, location } = data;
-
-      console.log(`user ${userId} updated location to ${location}`);
-
-      if (userType === "captain") {
-        await captainModel.findOneAndUpdate(userId, { location });
-      } else if (userType === "user") {
-        await userModel.findOneAndUpdate(userId, { location });
-      }
-    });
-
+    // ✅ REPLACED and FIXED the location update logic
+    // We only need one listener for the captain's location update.
     socket.on("update-location-captain", async (data) => {
+      // ✅ Destructure lng and ltd directly from the data payload
+      const { userId, lng, ltd } = data;
 
-      const { userId, location } = data;
-
-      if (!location || !location.ltd || !location.lng) {
-        return socket.emit("error", { message: "Invalid location data" });
+      if (!userId || !lng || !ltd) {
+        return console.log("Invalid location data received:", data);
       }
 
-      await captainModel.findOneAndUpdate(userId,
-        { location: { ltd: location.ltd, lng: location.lng } }
-      );
+      try {
+        // ✅ Update the database using the correct GeoJSON format
+        await captainModel.findByIdAndUpdate(userId, {
+          location: {
+            type: "Point",
+            coordinates: [lng, ltd], // Correct format: [longitude, latitude]
+          },
+        });
+      } catch (error) {
+        console.error("Error updating captain location:", error);
+      }
     });
 
     socket.on("disconnect", () => {
@@ -74,4 +67,6 @@ function sendMessageToSocketId(socketId, messageObject) {
   }
 }
 
-module.exports = initializeSocket;
+// ✅ CORRECTED MODULE EXPORTS
+// You need to export both functions so they can be used in other files.
+module.exports = { initializeSocket, sendMessageToSocketId };

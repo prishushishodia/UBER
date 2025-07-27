@@ -1,7 +1,34 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
-const  FinishRide = (props) => {
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const FinishRide = (props) => {
+  const navigate = useNavigate();
+  async function endRide() {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+        {
+          rideId: props.ride._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        props.setFinishRidePanel(false);
+        props.setRidePopupPanel(false);
+        navigate("/captain-home");
+      }
+    } catch (error) {
+      console.error("Error ending ride:", error);
+    }
+  }
+
   return (
     <div className="p-6 rounded-t-3xl bg-white  shadow-2xl relative max-w-md mx-auto">
       {/* Close Icon */}
@@ -25,7 +52,10 @@ const  FinishRide = (props) => {
             src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Rider"
           />
-          <div className="text-gray-700 font-medium text-base">Riya Singh</div>
+          <div className="text-gray-700 font-medium text-base">
+            {props.ride?.user?.fullname?.firstname}{" "}
+            {props.ride?.user?.fullname?.lastname}
+          </div>
         </div>
         <div className="text-sm font-semibold text-gray-600">2.2 km</div>
       </div>
@@ -38,9 +68,7 @@ const  FinishRide = (props) => {
             <div className="text-sm font-semibold text-gray-800">
               Pickup Point
             </div>
-            <p className="text-sm text-gray-500">
-              562/11-B, Kankariya Talab, Bhopal
-            </p>
+            <p className="text-sm text-gray-500">{props.ride?.pickup}</p>
           </div>
         </div>
 
@@ -50,7 +78,7 @@ const  FinishRide = (props) => {
             <div className="text-sm font-semibold text-gray-800">
               Destination
             </div>
-            <p className="text-sm text-gray-500">Kankariya Talab, Bhopal</p>
+            <p className="text-sm text-gray-500">{props.ride?.destination}</p>
           </div>
         </div>
 
@@ -58,19 +86,22 @@ const  FinishRide = (props) => {
           <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
           <div>
             <div className="text-sm font-semibold text-gray-800">Fare</div>
-            <p className="text-sm text-gray-500">₹99</p>
+            <p className="text-sm text-gray-500">₹{props.ride?.fare}</p>
           </div>
         </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">
-        <Link
+        <button
+          onClick={endRide}
           to="/captain-home"
           className="bg-yellow-500 hover:bg-green-600 text-center text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
         >
           Finish Ride
-        </Link>
-        <p className="text-red-500 text-center text-sm">Click on the finish ride button if you have completed the payment.</p>
+        </button>
+        <p className="text-red-500 text-center text-sm">
+          Click on the finish ride button if you have completed the payment.
+        </p>
       </div>
     </div>
   );
