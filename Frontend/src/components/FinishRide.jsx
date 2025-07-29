@@ -1,33 +1,28 @@
 import React from "react";
-
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const FinishRide = (props) => {
+const  FinishRide = (props) => {
   const navigate = useNavigate();
-  async function endRide() {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
-        {
-          rideId: props.ride._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+// FinishRide.jsx
 
-      if (response.status === 200) {
-        props.setFinishRidePanel(false);
-        props.setRidePopupPanel(false);
-        navigate("/captain-home");
-      }
-    } catch (error) {
-      console.error("Error ending ride:", error);
+async function endRide() {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+      { rideId: props.ride._id },
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+
+    if (response.status === 200) {
+      console.log("Ride ended successfully, navigating home.");
+      props.setFinishRidePanel(false);
+      navigate("/captain-home");
     }
+  } catch (error) {
+    console.error("Error ending ride:", error);
   }
+}
 
   return (
     <div className="p-6 rounded-t-3xl bg-white  shadow-2xl relative max-w-md mx-auto">

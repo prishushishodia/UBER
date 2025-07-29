@@ -1,8 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Link , useLocation, useNavigate} from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
-
-
+import LiveTracking from "../components/LiveTracking";
 
 const Riding = () => {
 
@@ -15,22 +14,14 @@ socket.on('ride-ended',()=>{
   navigate('/home')
 })
 
-
-
-
-
-
   return (
     <div className="h-screen">
          <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
                 <i className="text-lg font-medium ri-home-5-line"></i>
             </Link>
       <div className="h-1/2">
-        <img
-          className="h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1568137223448-0708e0e4779c?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="load"
-        />
+      <LiveTracking/>
+       
       </div>
       <div className="h-1/2 p-4">
       
@@ -67,13 +58,6 @@ socket.on('ride-ended',()=>{
           </div>
         </div>
 
-        {/* {ride&&(
-          <div>
-            <h2>ride ID:{ride._id}</h2>
-            <h2>pickup:{ride.pickup}</h2>
-            <h2>destination:{ride.destination}</h2>
-          </div>
-        )} */}
         <button className="w-full mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg">Make a payment</button>
       </div>
     </div>

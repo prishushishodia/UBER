@@ -19,8 +19,8 @@ const WaitingForDriver = (props) => {
           alt="car waiting"
         />
         <div>
-          <h2>{props.ride?.captain.fullname.firstname}</h2>
-          <h4>{props.ride?.captain.vehicle.plate}</h4>
+       <h2>{props.ride?.captain?.fullname?.firstname}</h2>
+<h4>{props.ride?.captain?.vehicle?.plate}</h4>
           <p>Maruti Suzuki Alto</p>
           <h1 className="text-lg font-semibold">OTP:{props.ride?.otp}</h1>
         </div>

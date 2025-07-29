@@ -3,11 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import FinishRide from "../components/FinishRide";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
+import LiveTracking from "../components/LiveTracking";
 
 const CaptainRiding = (props) => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
   const finishRidePanelRef = useRef(null);
-  
+
   // ✅ This is correct. You are getting the ride data here.
   const location = useLocation();
   const rideData = location.state?.ride;
@@ -37,11 +38,7 @@ const CaptainRiding = (props) => {
           </Link>
         </div>
         <div className="h-4/5">
-          <img
-            className="h-full w-full object-cover"
-            src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-            alt="load"
-          />
+          <LiveTracking />
         </div>
 
         {/* ✅ MODIFIED THIS BLOCK TO USE REAL DATA */}

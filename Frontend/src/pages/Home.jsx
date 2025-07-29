@@ -11,6 +11,8 @@ import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
+import LiveTracking from "../components/LiveTracking";
+
 
 
 const Home = () => {
@@ -58,16 +60,31 @@ socket.on('ride-started',ride=>{
 })
 })
 
+// In your user's Home.jsx
+
 useEffect(() => {
-  // Ensure the socket is connected before setting up listeners
-    socket.on('ride-confirmed', ride => {
+    // Ensure the socket is connected before setting up listeners
+    if (!socket) return;
 
+    const handleRideConfirmed = (rideData) => {
+        console.log("✅ Ride confirmed, updating UI with:", rideData);
 
-        setVehicleFound(false)
-        setWaitingForDriver(true)
-        setRide(ride)
-    })
-}); 
+        // Use the 'rideData' variable directly.
+        // The data is the object itself, not nested under '.data'.
+        setRide(rideData);
+
+        setVehicleFound(false);
+        setWaitingForDriver(true);
+    };
+
+    socket.on('ride-confirmed', handleRideConfirmed);
+
+    // ✅ This cleanup function is crucial to prevent bugs
+    return () => {
+        socket.off('ride-confirmed', handleRideConfirmed);
+    };
+
+}, [socket]); // ✅ The dependency array is also crucial
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
@@ -130,14 +147,9 @@ useEffect(() => {
     console.log(response.data);
   }
 
-  async function createRide() {
-  // ✅ Add this console.log to debug
-  console.log("Sending data to create ride:", {
-    pickup,
-    destination,
-    vehicleType,
-  });
+// Home.jsx
 
+async function createRide() {
   try {
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/rides/create`,
@@ -152,14 +164,20 @@ useEffect(() => {
         },
       }
     );
+    
+    // First, set the ride data
     setRide(response.data);
-    console.log(response.data);
+    console.log("Ride created successfully:", response.data);
+
+    // ✅ THEN, change the UI to show the next panel
+    setConfirmRidePanel(false);
+    setVehicleFound(true);
+
   } catch (error) {
-    // This will log the detailed error response from your backend
-    console.error("Error creating ride:", error.response.data);
+    console.error("Error creating ride:", error.response?.data || error.message);
+    // You might want to show an error message to the user here
   }
 }
-
   useGSAP(
     function () {
       if (panelOpen) {
@@ -252,13 +270,9 @@ useEffect(() => {
         src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
         alt=""
       />
-      <div className="h-screen w-screen">
+      <div className="h-screen relative z-[-1] w-screen">
         {/* image for temporary use  */}
-        <img
-          className="h-full w-full object-cover"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-          alt="load"
-        />
+      <LiveTracking/>
       </div>
       <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
         <div className="h-[30%] p-6 bg-white relative">
@@ -345,10 +359,10 @@ useEffect(() => {
           pickup={pickup}
           destination={destination}
           fare={fare}
-         
+         setVehicleFound={setVehicleFound}
           createRide={createRide}
           setConfirmRidePanel={setConfirmRidePanel}
-          setVehicleFound={setVehicleFound}
+
         />
       </div>
       <div

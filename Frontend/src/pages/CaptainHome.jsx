@@ -8,6 +8,7 @@ import { gsap } from "gsap";
 import { SocketContext } from "../context/SocketContext";
 import { CaptainDataContext } from "../context/CaptainContext";
 import axios from 'axios'; // ✅ Add this line
+import LiveTracking from "../components/LiveTracking";
 
 
 const CaptainHome = () => {
@@ -29,6 +30,8 @@ const CaptainHome = () => {
       userType: "captain",
     });
 
+
+
     const updateLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -46,6 +49,34 @@ const CaptainHome = () => {
 
     // return () => clearInterval(locationInterval);
   }, [socket, captain]);
+
+    const handleAcceptRide = () => {
+    if (!ride?._id || !socket || !captain?._id) return;
+
+    console.log("📡 Emitting 'accept-ride' to server...");
+    
+    // 1. Emit the event to the server
+    socket.emit("accept-ride", {
+      rideId: ride._id,
+      captainId: captain._id,
+    });
+
+    // 2. Immediately update the captain's UI for a responsive feel
+    setRidePopUpPanel(false);
+    setConfirmRidePopUpPanel(true);
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('ride-confirmed-for-captain', (data) => {
+        console.log("Server confirmed the ride acceptance", data);
+        // You can use this to update the ride state with OTP if needed
+        // setRide(prevRide => ({...prevRide, ...data})); 
+    });
+
+    return () => socket.off('ride-confirmed-for-captain');
+  }, [socket]);
 
     const confirmRide = async () => {
     if (!ride?._id) return; // Add a check for the ride ID
@@ -119,12 +150,8 @@ const CaptainHome = () => {
         </div>
 
         {/* Map Loading Section */}
-        <div className="h-4/6">
-          <img
-            className="h-full w-full object-cover"
-            src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-            alt="loading"
-          />
+        <div className="h-4/6 relative z-[-1]">
+        <LiveTracking/>
         </div>
 
         {/* Details Section */}
@@ -140,6 +167,7 @@ const CaptainHome = () => {
           <RidePopUp
             ride={ride}
             confirmRide={confirmRide}
+            acceptRide={handleAcceptRide} 
             setRidePopUpPanel={setRidePopUpPanel}
             setConfirmRidePopUpPanel={setConfirmRidePopUpPanel}
           />

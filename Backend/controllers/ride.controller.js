@@ -123,11 +123,13 @@ module.exports.endRide = async (req, res) => {
       rideId,
       captain: req.captain,
     });
-    sendMessageToSocketId(ride.user.socketId, {
-      event: "ride-ended",
-      data: ride,
-    });
-res.status(200).json({ message: "Ride ended successfully", data: ride });
+       if (ride && ride.user && ride.user.socketId) {
+      sendMessageToSocketId(ride.user.socketId, {
+        event: "ride-ended",
+        data: ride,
+      });
+    }
+res.status(200).json({ message: "Ride ended successfully", ride });
 
   } catch (error) {
     return res.status(500).json({ message: error.message });

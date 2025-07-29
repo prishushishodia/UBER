@@ -154,10 +154,15 @@ module.exports.endRide = async ({ rideId, captain }) => {
     throw new Error('Ride not ongoing');
   }
 
-  await rideModel.findOneAndUpdate(
-    { _id: rideId },
-    { status: 'completed' }
-  );
+ const updatedRide = await rideModel.findByIdAndUpdate(
+    rideId,
+    { status: 'completed' },
+    { new: true } // This option returns the updated document.
+  ).populate('user').populate('captain');
+
+  if (!updatedRide) {
+    throw new Error('Failed to update ride status.');
+  }
 return ride;
 
 
