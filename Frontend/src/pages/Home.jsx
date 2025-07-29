@@ -340,7 +340,7 @@ async function createRide() {
       </div>
       <div
         ref={vehiclePanelRef}
-        className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
+        className="fixed bottom-0 translate-y-full z-10 w-full bg-white"
       >
         <VehiclePanel
           selectVehicle={setVehicleType}
@@ -375,7 +375,7 @@ async function createRide() {
       </div>
       <div
         ref={waitingForDriverRef}
-        className="fixed bottom-0  z-10 w-full bg-white px-3 py-12"
+  className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
         <WaitingForDriver 
         ride={ride} 

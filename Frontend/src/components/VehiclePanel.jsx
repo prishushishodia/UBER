@@ -2,7 +2,7 @@ import React from "react";
 
 const VehiclePanel = (props) => {
   return (
-    <div>
+    <div className="relative px-3 py-12">
       <h5
         onClick={() => {
           props.setVehiclePanel(false);
