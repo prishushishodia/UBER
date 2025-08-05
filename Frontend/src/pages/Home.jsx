@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { use, useContext, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import axios from "axios";
@@ -12,6 +12,8 @@ import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import LiveTracking from "../components/LiveTracking";
+
+
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -32,37 +34,57 @@ const Home = () => {
   const [activeField, setActiveField] = useState(null);
   const [fare, setFare] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
-  const [ride, setRide] = useState(null);
+  const [ride, setRide] = useState(null)
 
-  const navigate = useNavigate();
+const navigate= useNavigate();
+
   const { socket } = useContext(SocketContext);
   const { user } = useContext(UserDataContext);
 
-  useEffect(() => {
-    if (user && user._id) {
-      socket.emit("join", { userType: "user", userId: user._id });
-    }
-  }, [user]);
+// Home.jsx
 
-  useEffect(() => {
-    if (!socket) return;
-    socket.on('ride-started', ride => {
-      setWaitingForDriver(false);
-      navigate('/riding', { state: { ride } });
-    });
-    return () => socket.off('ride-started');
-  }, [socket, navigate]);
+useEffect(() => {
+  // ✅ Add this check!
+  // Only proceed if 'user' is not null and has an '_id'.
+  if (user && user._id) {
+    socket.emit("join", { userType: "user", userId: user._id });
+    console.log("Joining socket room with user:", user);
+  }
+}, [user]);
 
-  useEffect(() => {
+useEffect(() => {
+socket.on('ride-started',ride=>{
+  setWaitingForDriver(false)
+  navigate('/riding',{state:{ride}})
+
+})
+})
+
+// In your user's Home.jsx
+
+useEffect(() => {
+    // Ensure the socket is connected before setting up listeners
     if (!socket) return;
+
     const handleRideConfirmed = (rideData) => {
-      setRide(rideData);
-      setVehicleFound(false);
-      setWaitingForDriver(true);
+        console.log("✅ Ride confirmed, updating UI with:", rideData);
+
+        // Use the 'rideData' variable directly.
+        // The data is the object itself, not nested under '.data'.
+        setRide(rideData);
+
+        setVehicleFound(false);
+        setWaitingForDriver(true);
     };
+
     socket.on('ride-confirmed', handleRideConfirmed);
-    return () => socket.off('ride-confirmed', handleRideConfirmed);
-  }, [socket]);
+
+    // ✅ This cleanup function is crucial to prevent bugs
+    return () => {
+        socket.off('ride-confirmed', handleRideConfirmed);
+    };
+
+}, [socket]); // ✅ The dependency array is also crucial
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
@@ -118,41 +140,64 @@ const Home = () => {
       }
     );
     setFare(response.data);
+
     setVehiclePanel(true);
     setPanelOpen(false);
+
+    console.log(response.data);
   }
 
-  async function createRide() {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/rides/create`,
-        {
-          pickup,
-          destination,
-          vehicleType,
+// Home.jsx
+
+async function createRide() {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/rides/create`,
+      {
+        pickup,
+        destination,
+        vehicleType,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      setRide(response.data);
-      setConfirmRidePanel(false);
-      setVehicleFound(true);
-    } catch (error) {
-      console.error("Error creating ride:", error.response?.data || error.message);
-    }
-  }
+      }
+    );
+    
+    // First, set the ride data
+    setRide(response.data);
+    console.log("Ride created successfully:", response.data);
 
+    // ✅ THEN, change the UI to show the next panel
+    setConfirmRidePanel(false);
+    setVehicleFound(true);
+
+  } catch (error) {
+    console.error("Error creating ride:", error.response?.data || error.message);
+    // You might want to show an error message to the user here
+  }
+}
   useGSAP(
     function () {
       if (panelOpen) {
-        gsap.to(panelRef.current, { height: "70%", padding: 24 });
-        gsap.to(panelCloseRef.current, { opacity: 1 });
+        gsap.to(panelRef.current, {
+          height: "70%",
+          padding: 24,
+          // opacity:1
+        });
+        gsap.to(panelCloseRef.current, {
+          opacity: 1,
+        });
       } else {
-        gsap.to(panelRef.current, { height: "0%", padding: 0 });
-        gsap.to(panelCloseRef.current, { opacity: 0 });
+        gsap.to(panelRef.current, {
+          height: "0%",
+          padding: 0,
+          // opacity:0
+        });
+        gsap.to(panelCloseRef.current, {
+          opacity: 0,
+        });
       }
     },
     [panelOpen]
@@ -161,9 +206,13 @@ const Home = () => {
   useGSAP(
     function () {
       if (vehiclePanel) {
-        gsap.to(vehiclePanelRef.current, { transform: "translateY(0)" });
+        gsap.to(vehiclePanelRef.current, {
+          transform: "translateY(0)",
+        });
       } else {
-        gsap.to(vehiclePanelRef.current, { transform: "translateY(100%)" });
+        gsap.to(vehiclePanelRef.current, {
+          transform: "translateY(100%)",
+        });
       }
     },
     [vehiclePanel]
@@ -172,9 +221,13 @@ const Home = () => {
   useGSAP(
     function () {
       if (confirmRidePanel) {
-        gsap.to(confirmRidePanelRef.current, { transform: "translateY(0)" });
+        gsap.to(confirmRidePanelRef.current, {
+          transform: "translateY(0)",
+        });
       } else {
-        gsap.to(confirmRidePanelRef.current, { transform: "translateY(100%)" });
+        gsap.to(confirmRidePanelRef.current, {
+          transform: "translateY(100%)",
+        });
       }
     },
     [confirmRidePanel]
@@ -183,9 +236,13 @@ const Home = () => {
   useGSAP(
     function () {
       if (vehicleFound) {
-        gsap.to(vehicleFoundRef.current, { transform: "translateY(0)" });
+        gsap.to(vehicleFoundRef.current, {
+          transform: "translateY(0)",
+        });
       } else {
-        gsap.to(vehicleFoundRef.current, { transform: "translateY(100%)" });
+        gsap.to(vehicleFoundRef.current, {
+          transform: "translateY(100%)",
+        });
       }
     },
     [vehicleFound]
@@ -194,9 +251,13 @@ const Home = () => {
   useGSAP(
     function () {
       if (waitingForDriver) {
-        gsap.to(waitingForDriverRef.current, { transform: "translateY(0)" });
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(0)",
+        });
       } else {
-        gsap.to(waitingForDriverRef.current, { transform: "translateY(100%)" });
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(100%)",
+        });
       }
     },
     [waitingForDriver]
@@ -204,37 +265,33 @@ const Home = () => {
 
   return (
     <div className="h-screen relative overflow-hidden">
-      {/* This is the logo. We've given it a z-index of 20 to ensure it renders 
-        above the map but below the main UI panels.
-      */}
       <img
-        className="w-16 absolute left-5 top-5 z-20"
+        className="w-16 absolute left-5 top-5"
         src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
         alt=""
       />
-      
-      {/* This is the map. It is placed in a fixed container with z-index 0
-        so it acts as the background.
-      */}
-      <div className="fixed top-0 left-0 w-full h-full z-0">
-        <LiveTracking />
+      <div className="h-screen relative z-[-1] w-screen">
+        {/* image for temporary use  */}
+      <LiveTracking/>
       </div>
-
-      {/* This is the main panel. We removed pointer-events-none and gave it 
-        a high z-index (e.g., 30) so it appears on top of the logo and map. 
-        The pointer-events will now work as expected on the child elements.
-      */}
-      <div className="absolute bottom-0 w-full z-30">
+      <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
         <div className="h-[30%] p-6 bg-white relative">
           <h5
             ref={panelCloseRef}
-            onClick={() => setPanelOpen(false)}
+            onClick={() => {
+              setPanelOpen(false);
+            }}
             className="absolute opacity-0 right-6 top-6 text-2xl"
           >
             <i className="ri-arrow-down-wide-line"></i>
           </h5>
           <h4 className="text-2xl font-semibold">Find a trip</h4>
-          <form className="relative py-3" onSubmit={submitHandler}>
+          <form
+            className="relative py-3"
+            onSubmit={(e) => {
+              submitHandler(e);
+            }}
+          >
             <div className="line absolute h-16 w-1 top-[50%] -translate-y-1/2 left-5 bg-gray-700 rounded-full"></div>
             <input
               onClick={() => {
@@ -254,7 +311,7 @@ const Home = () => {
               }}
               value={destination}
               onChange={handleDestinationChange}
-              className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full mt-3"
+              className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full  mt-3"
               type="text"
               placeholder="Enter your destination"
             />
@@ -266,11 +323,12 @@ const Home = () => {
             Find Trip
           </button>
         </div>
-
-        <div ref={panelRef} className="bg-white h-0 overflow-hidden">
+        <div ref={panelRef} className="bg-white h-0">
           <LocationSearchPanel
             suggestions={
-              activeField === "pickup" ? pickupSuggestions : destinationSuggestions
+              activeField === "pickup"
+                ? pickupSuggestions
+                : destinationSuggestions
             }
             setPanelOpen={setPanelOpen}
             setVehiclePanel={setVehiclePanel}
@@ -280,10 +338,9 @@ const Home = () => {
           />
         </div>
       </div>
-
       <div
         ref={vehiclePanelRef}
-        className="fixed bottom-0 translate-y-full z-40 w-full bg-white"
+        className="fixed bottom-0 translate-y-full z-10 w-full bg-white"
       >
         <VehiclePanel
           selectVehicle={setVehicleType}
@@ -292,10 +349,9 @@ const Home = () => {
           setVehiclePanel={setVehiclePanel}
         />
       </div>
-
       <div
         ref={confirmRidePanelRef}
-        className="fixed bottom-0 translate-y-full z-40 w-full bg-white px-3 py-12"
+        className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
         <ConfirmRide
           vehicleType={vehicleType}
@@ -303,29 +359,29 @@ const Home = () => {
           pickup={pickup}
           destination={destination}
           fare={fare}
-          setVehicleFound={setVehicleFound}
+         setVehicleFound={setVehicleFound}
           createRide={createRide}
           setConfirmRidePanel={setConfirmRidePanel}
+
         />
       </div>
-
       <div
         ref={vehicleFoundRef}
-        className="fixed bottom-0 translate-y-full z-40 w-full bg-white px-3 py-12"
+        className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
-        <LookingForDriver ride={ride} setVehicleFound={setVehicleFound} />
+        <LookingForDriver 
+        ride={ride} 
+        setVehicleFound={setVehicleFound} />
       </div>
-
       <div
         ref={waitingForDriverRef}
-        className="fixed bottom-0 translate-y-full z-40 w-full bg-white px-3 py-12"
+  className="fixed bottom-0 translate-y-full z-10 w-full bg-white px-3 py-12"
       >
-        <WaitingForDriver
-          ride={ride}
-          setVehicleFound={setVehicleFound}
-          setWaitingForDriver={setWaitingForDriver}
-          waitingForDriver={waitingForDriver}
-        />
+        <WaitingForDriver 
+        ride={ride} 
+        setVehicleFound={setVehicleFound} 
+        setWaitingForDriver={setWaitingForDriver}
+        waitingForDriver={waitingForDriver} />
       </div>
     </div>
   );
