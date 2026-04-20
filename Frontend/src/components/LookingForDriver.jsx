@@ -2,59 +2,75 @@ import React from "react";
 
 const LookingForDriver = (props) => {
   return (
-    <div className="relative px-5 pt-4 pb-8 bg-white rounded-t-3xl shadow-lg">
-      {/* Top handle arrow */}
-      <h5
-        onClick={() => {
-          props.setVehicleFound(false);
-        }}
-        className="absolute top-2 left-0 w-full flex justify-center items-center cursor-pointer text-gray-500"
+    <div className="bg-white rounded-t-3xl px-5 pt-3 pb-6">
+      {/* Drag handle */}
+      <div
+        className="flex justify-center pb-3 cursor-pointer"
+        onClick={() => props.setVehicleFound(false)}
       >
-        <i className="ri-arrow-down-wide-line text-2xl"></i>
-      </h5>
+        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+      </div>
 
-      {/* Title */}
-      <h3 className="font-semibold mt-10 text-center text-gray-900 text-xl tracking-wide">
-        Looking for a driver
-        <span className="inline-block animate-pulse">...</span>
-      </h3>
+      {/* Header */}
+      <h2 className="text-lg font-bold text-[#111] mb-1">Finding your driver</h2>
+      <p className="text-xs text-[#6B7280] mb-5">
+        Please wait while we match you with a nearby captain
+      </p>
 
-      {/* Content Block */}
-      <div className="flex flex-col items-center mt-6">
-        {/* Car Image */}
-        <img
-          className="h-40 object-contain"
-          src="https://imgs.search.brave.com/CMLbPLH7Ll2IYDQWDJlV_dvFOcx3cXDKDFXTM-tz19g/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wNDgv/NjAwLzczNS9zbWFs/bC9tb2Rlcm4tY2Fy/LWlzb2xhdGVkLW9u/LWJhY2tncm91bmQt/M2QtcmVuZGVyaW5n/LWlsbHVzdHJhdGlv/bi1wbmcucG5n"
-          alt="car waiting"
-        />
-
-        {/* Ride Details */}
-        <div className="w-full mt-6 rounded-xl bg-gray-50 border border-gray-200 shadow-sm overflow-hidden divide-y divide-gray-200">
-          {/* Pickup */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-blue-600 ri-map-pin-fill"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">{props.ride?.pickup}</h3>
-              <p className="text-sm text-gray-500">pickup</p>
-            </div>
+      {/* Animated icon */}
+      <div className="flex flex-col items-center mb-5">
+        <div className="relative flex items-center justify-center">
+          {/* Pulse rings */}
+          <span className="absolute inline-flex h-20 w-20 rounded-full bg-[#00C853]/20 animate-ping" />
+          <span className="absolute inline-flex h-14 w-14 rounded-full bg-[#00C853]/30 animate-ping [animation-delay:0.3s]" />
+          {/* Icon circle */}
+          <div className="relative z-10 h-16 w-16 rounded-full bg-black flex items-center justify-center shadow-lg">
+            <i className="ri-taxi-wifi-line text-2xl text-white"></i>
           </div>
+        </div>
+        <p className="text-xs text-[#6B7280] mt-4 animate-pulse">
+          Searching for captains nearby…
+        </p>
+      </div>
 
-          {/* Destination */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-green-600 ri-map-pin-3-line"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">{props.ride?.destination}</h3>
-              <p className="text-sm text-gray-500">destination</p>
-            </div>
+      {/* Ride details */}
+      <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm">
+        {/* Pickup */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-map-pin-fill"></i>
           </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Pickup</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              {props.ride?.pickup}
+            </h3>
+          </div>
+        </div>
 
-          {/* Fare */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-900">₹{props.ride?.fare}</h3>
-              <p className="text-sm text-gray-500">Ride Fare</p>
-            </div>
+        {/* Destination */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-map-pin-3-line"></i>
+          </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Destination</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              {props.ride?.destination}
+            </h3>
+          </div>
+        </div>
+
+        {/* Fare */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-money-rupee-circle-line"></i>
+          </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Estimated Fare</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              ₹{props.ride?.fare}
+            </h3>
           </div>
         </div>
       </div>

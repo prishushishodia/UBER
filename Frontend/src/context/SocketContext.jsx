@@ -1,32 +1,20 @@
-import react, {createContext, use, useEffect} from 'react';
+import React, { createContext, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 export const SocketContext = createContext();
 
-const socket = io(`${import.meta.env.VITE_BASE_URL}`);
+const SocketProvider = ({ children }) => {
+    const socketRef = useRef(null);
 
-const socketProvider = ({ children }) => {
-    useEffect(() => {
-        socket.on("connect", () => {
-            console.log("Socket connected:", socket.id);
-        });
+    if (!socketRef.current) {
+        socketRef.current = io(import.meta.env.VITE_BASE_URL);
+    }
 
-        socket.on("disconnect", () => {
-            console.log("Socket disconnected");
-        });
-    },[]);
-
-    // const sendMessage = (eventName, message) => {
-    //     socket.emit(eventName , message);
-    // };
-
-    // const recieveMessage = (eventName, callback) => {
-    //     socket.on(eventName,callback);
-    // }
-    return(
-        <SocketContext.Provider value={{ socket}}>
+    return (
+        <SocketContext.Provider value={{ socket: socketRef.current }}>
             {children}
         </SocketContext.Provider>
-    )
-}
-export default socketProvider;
+    );
+};
+
+export default SocketProvider;

@@ -1,68 +1,95 @@
 import React from "react";
 
 const WaitingForDriver = (props) => {
+  const captainFirstName = props.ride?.captain?.fullname?.firstname || "";
+  const captainLastName = props.ride?.captain?.fullname?.lastname || "";
+  const initials =
+    (captainFirstName[0] || "") + (captainLastName[0] || "") || "C";
+
   return (
-    <div className="relative px-4 pt-2 pb-6 bg-white rounded-t-2xl shadow-md">
-      {/* Top handle arrow */}
-      <h5
-        onClick={() => {
-          props.setWaitingForDriver(false);
-        }}
-        className="absolute top-0 left-0 w-full flex justify-center items-center -translate-y-6 py-0 cursor-pointer text-gray-700"
+    <div className="bg-white rounded-t-3xl px-5 pt-3 pb-6">
+      {/* Drag handle */}
+      <div
+        className="flex justify-center pb-3 cursor-pointer"
+        onClick={() => props.setWaitingForDriver(false)}
       >
-        <i className="ri-arrow-down-wide-line text-2xl"></i>
-      </h5>
-      <div className="flex justify-between items-center">
-        <img
-          className="h-25 object-contain"
-          src="https://imgs.search.brave.com/CMLbPLH7Ll2IYDQWDJlV_dvFOcx3cXDKDFXTM-tz19g/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wNDgv/NjAwLzczNS9zbWFs/bC9tb2Rlcm4tY2Fy/LWlzb2xhdGVkLW9u/LWJhY2tncm91bmQt/M2QtcmVuZGVyaW5n/LWlsbHVzdHJhdGlv/bi1wbmcucG5n"
-          alt="car waiting"
-        />
-        <div>
-       <h2>{props.ride?.captain?.fullname?.firstname}</h2>
-<h4>{props.ride?.captain?.vehicle?.plate}</h4>
-          <p>Maruti Suzuki Alto</p>
-          <h1 className="text-lg font-semibold">OTP:{props.ride?.otp}</h1>
+        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+      </div>
+
+      {/* Header */}
+      <h2 className="text-lg font-bold text-[#00C853] mb-1">
+        Your ride is confirmed!
+      </h2>
+      <p className="text-xs text-[#6B7280] mb-4">
+        Your captain is on the way to pick you up
+      </p>
+
+      {/* Captain info + OTP */}
+      <div className="flex items-center justify-between bg-[#F6F6F6] rounded-2xl px-4 py-3 mb-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="h-12 w-12 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-base font-bold uppercase">
+              {initials}
+            </span>
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-[#111]">
+              {captainFirstName} {captainLastName}
+            </h3>
+            <p className="text-xs text-[#6B7280]">
+              {props.ride?.captain?.vehicle?.plate || "—"}
+            </p>
+          </div>
+        </div>
+
+        {/* OTP box */}
+        <div className="bg-black rounded-xl px-4 py-2 text-center">
+          <p className="text-[10px] text-gray-400 font-medium">OTP</p>
+          <p className="text-lg font-extrabold text-white tracking-widest leading-none">
+            {props.ride?.otp}
+          </p>
         </div>
       </div>
 
-      {/* Content Block */}
-      <div className="flex flex-col items-center mt-6">
-        {/* Car Image */}
-
-        {/* Ride Details */}
-        <div className="w-full mt-6 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden shadow-sm">
-          {/* Pickup */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-blue-600 ri-map-pin-fill"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-800">
-                {props.ride?.pickup}
-              </h3>
-              <p className="text-sm text-gray-500">pickup</p>
-            </div>
+      {/* Ride details */}
+      <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm">
+        {/* Pickup */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-map-pin-fill"></i>
           </div>
-
-          {/* Destination */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-green-600 ri-map-pin-3-line"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-800">
-                {props.ride?.destination}
-              </h3>
-              <p className="text-sm text-gray-500">destination</p>
-            </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Pickup</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              {props.ride?.pickup}
+            </h3>
           </div>
+        </div>
 
-          {/* Fare */}
-          <div className="flex items-start gap-4 p-4">
-            <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
-            <div>
-              <h3 className="text-base font-semibold text-gray-800">
-                ₹{props.ride?.fare}
-              </h3>
-              <p className="text-sm text-gray-500">Ride Fare</p>
-            </div>
+        {/* Destination */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-map-pin-3-line"></i>
+          </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Destination</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              {props.ride?.destination}
+            </h3>
+          </div>
+        </div>
+
+        {/* Fare */}
+        <div className="flex items-start gap-3 p-4">
+          <div className="mt-0.5 h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+            <i className="text-white text-sm ri-money-rupee-circle-line"></i>
+          </div>
+          <div>
+            <p className="text-xs text-[#6B7280] font-medium">Ride Fare</p>
+            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
+              ₹{props.ride?.fare}
+            </h3>
           </div>
         </div>
       </div>

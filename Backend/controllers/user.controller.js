@@ -1,4 +1,3 @@
-const { removeListener } = require("../app");
 const userModel = require("../models/user.model");
 const userService = require("../services/user.service");
 const { validationResult } = require("express-validator");
@@ -6,12 +5,9 @@ const blacklistTokenModel = require("../models/blacklistToken.model");
 
 module.exports.registerUser = async (req, res, next) => {
   const errors = validationResult(req);
-   console.log("Validation failed:", errors.array());  // 👈 Add this
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
-  console.log(req.body);
 
   const { fullname, email, password } = req.body;
 

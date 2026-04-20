@@ -2,128 +2,127 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ConfirmRidePopUp = (props) => {
+const ConfirmRidePopUp = ({ ride, setConfirmRidePopUpPanel, setRidePopUpPanel }) => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
         {
-          params: {
-            rideId: props.ride._id,
-            otp: otp,
-          },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          params: { rideId: ride._id, otp },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-
       if (response.status === 200) {
-        props.setConfirmRidePopUpPanel(false);
-        props.setRidePopUpPanel(false);
-        navigate("/captain-riding",{state:{ride:props.ride}});
+        setConfirmRidePopUpPanel(false);
+        setRidePopUpPanel(false);
+        navigate("/captain-riding", { state: { ride } });
       }
     } catch (error) {
       console.error("Error starting ride:", error);
     }
   };
 
+  const firstName = ride?.user?.fullname?.firstname || "";
+  const lastName = ride?.user?.fullname?.lastname || "";
+
   return (
-    <div className="p-6 rounded-t-3xl bg-white shadow-2xl relative max-w-md mx-auto">
-      {/* Close Icon */}
-      <button
-        onClick={() => props.setConfirmRidePopUpPanel(false)}
-        className="absolute top-4 -translate-y-14 left-1/2 text-2xl text-gray-500 hover:text-black transition"
-      >
-        <i className="ri-arrow-down-wide-line"></i>
-      </button>
-
+    <div className="h-full bg-white flex flex-col">
       {/* Header */}
-      <h2 className="text-xl font-bold text-center text-gray-800 mt-2 mb-6">
-        🚘 Confirm Your Ride
-      </h2>
-
-      {/* Rider Info */}
-      <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl mb-4 shadow-inner">
-        <div className="flex items-center gap-4">
-          <img
-            className="h-14 w-14 rounded-full object-cover border border-gray-300"
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0"
-            alt="Rider"
-          />
-          <div className="text-gray-700 font-medium text-base">Riya Singh</div>
+      <div className="flex-shrink-0 px-5 pt-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-[#111]">Ride confirmed</h2>
+          <button
+            onClick={() => setConfirmRidePopUpPanel(false)}
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500"
+          >
+            <i className="ri-close-line text-lg" />
+          </button>
         </div>
-        <div className="text-sm font-semibold text-gray-600">2.2 km</div>
+        <p className="text-xs text-[#6B7280] mt-1">Ask the rider for the OTP to start the ride</p>
       </div>
 
-      {/* Ride Details */}
-      <div className="divide-y divide-gray-200">
-        <div className="flex items-start gap-4 py-4">
-          <i className="text-xl text-green-600 ri-map-pin-fill"></i>
-          <div>
-            <div className="text-sm font-semibold text-gray-800">
-              {props.ride?.pickup}
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-5 py-4">
+        {/* Rider info */}
+        <div className="flex items-center justify-between bg-[#F6F6F6] rounded-2xl px-4 py-3 mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-base font-bold uppercase">
+                {(firstName[0] || "") + (lastName[0] || "") || "R"}
+              </span>
             </div>
-            <p className="text-sm text-gray-500">Pickup Point</p>
+            <div>
+              <h3 className="text-sm font-bold text-[#111]">{firstName} {lastName}</h3>
+              <p className="text-xs text-[#6B7280]">Rider</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl px-3 py-1.5 shadow-sm text-right">
+            <p className="text-xs text-[#6B7280]">Fare</p>
+            <p className="text-sm font-bold text-[#111]">₹{ride?.fare}</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-4 py-4">
-          <i className="text-xl text-blue-600 ri-map-pin-3-line"></i>
-          <div>
-            <div className="text-sm font-semibold text-gray-800">
-              {props.ride?.destination}
+        {/* Route */}
+        <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm mb-5">
+          <div className="flex items-start gap-3 p-4">
+            <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+              <i className="text-white text-sm ri-map-pin-fill" />
             </div>
-            <p className="text-sm text-gray-500">Destination</p>
+            <div className="min-w-0">
+              <p className="text-xs text-[#6B7280] font-medium">Pickup</p>
+              <h3 className="text-sm font-semibold text-[#111] mt-0.5">{ride?.pickup}</h3>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-4">
+            <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
+              <i className="text-white text-sm ri-map-pin-3-line" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-[#6B7280] font-medium">Destination</p>
+              <h3 className="text-sm font-semibold text-[#111] mt-0.5">{ride?.destination}</h3>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-start gap-4 py-4">
-          <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
-          <div>
-            <div className="text-sm font-semibold text-gray-800">
-              ₹{props.ride?.fare}
-            </div>
-            <p className="text-sm text-gray-500">Fare</p>
-          </div>
-        </div>
-      </div>
-
-      {/* OTP Form */}
-      <div className="mt-6 flex flex-col gap-3">
-        <form onSubmit={submitHandler} className="flex flex-col gap-3 w-full px-6 py-4">
+        {/* OTP input */}
+        <form onSubmit={submitHandler} className="flex flex-col gap-3">
+          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wide">
+            Enter OTP from rider
+          </label>
           <input
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="bg-[#eee] px-4 py-2 text-center text-base rounded-lg w-full"
             type="text"
-            placeholder="Enter OTP"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="_ _ _ _ _ _"
             required
+            className="bg-[#F6F6F6] border border-gray-200 rounded-2xl px-4 py-4 text-center text-2xl font-bold tracking-[0.5em] text-[#111] focus:outline-none focus:ring-2 focus:ring-black transition"
           />
-
-          <button
-            type="submit"
-            className="bg-green-500 hover:bg-green-600 text-center text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
-          >
-            Confirm Ride
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              props.setRidePopUpPanel(false);
-              props.setConfirmRidePopUpPanel(false);
-            }}
-            className="bg-red-500 hover:bg-red-700 text-white font-semibold py-3 rounded-lg text-sm tracking-wide transition w-full"
-          >
-            Reject
-          </button>
         </form>
+      </div>
+
+      {/* Bottom actions */}
+      <div className="flex-shrink-0 px-5 pb-8 pt-3 flex flex-col gap-3">
+        <button
+          onClick={submitHandler}
+          className="w-full bg-[#00C853] text-white font-bold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform shadow-md"
+        >
+          Start Ride
+        </button>
+        <button
+          onClick={() => {
+            setRidePopUpPanel(false);
+            setConfirmRidePopUpPanel(false);
+          }}
+          className="w-full bg-[#F6F6F6] text-[#6B7280] font-semibold py-4 rounded-2xl text-sm active:scale-95 transition-transform"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );

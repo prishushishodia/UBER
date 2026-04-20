@@ -1,89 +1,79 @@
 import React from "react";
 
-const RidePopUp = (props) => {
+const RidePopUp = ({ ride, confirmRide, setRidePopUpPanel }) => {
+  const firstName = ride?.user?.fullname?.firstname || "";
+  const lastName = ride?.user?.fullname?.lastname || "";
+
   return (
-    <div className="p-4 rounded-2xl bg-white  relative">
-      {/* Close Icon */}
-      <button
-        onClick={() => props.setRidePopUpPanel(false)}
-        className="absolute top-2 left-1/2 text-2xl text-gray-600 hover:text-black transition"
+    <div className="bg-white rounded-t-3xl shadow-2xl">
+      {/* Drag handle */}
+      <div
+        className="flex justify-center pt-3 pb-2 cursor-pointer"
+        onClick={() => setRidePopUpPanel(false)}
       >
-        <i className="ri-arrow-down-wide-line"></i>
-      </button>
-
-      {/* Header */}
-      <h3 className="text-lg text-center font-bold text-gray-800 mb-4 mt-6">
-        🚘 wanna pick this New Ride Request?
-      </h3>
-
-      {/* Rider Info */}
-      <div className="flex items-center justify-between bg-gray-100 p-3 rounded-md mb-3">
-        <div className="flex items-center gap-3 text-base font-medium text-gray-700">
-          <img
-            className="h-12 w-12 rounded-full object-cover"
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="Rider"
-          />
-          <span>
-            {props.ride?.user.fullname.firstname}{" "}
-            {props.ride?.user.fullname.lastname}{" "}
-          </span>
-        </div>
-        <span className="text-sm font-semibold text-gray-600">2.2 km</span>
+        <div className="w-10 h-1 bg-gray-300 rounded-full" />
       </div>
 
-      {/* Ride Details */}
-      <div className="divide-y">
-        <div className="flex items-start gap-4 py-3">
-          <i className="text-xl text-green-600 ri-map-pin-fill"></i>
-          <div>
-            <h4 className="text-base font-semibold text-gray-800">
-              Pickup Point
-            </h4>
-            <p className="text-sm text-gray-500">{props.ride?.pickup}</p>
+      <div className="px-5 pb-6">
+        {/* Header */}
+        <h2 className="text-lg font-bold text-[#111] mb-4">New ride request</h2>
+
+        {/* Rider info */}
+        <div className="flex items-center justify-between bg-[#F6F6F6] rounded-2xl px-4 py-3 mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-sm font-bold uppercase">
+                {(firstName[0] || "") + (lastName[0] || "") || "R"}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-[#111]">{firstName} {lastName}</h3>
+              <p className="text-xs text-[#6B7280]">Rider</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl px-3 py-1.5 shadow-sm text-right">
+            <p className="text-xs text-[#6B7280]">Fare</p>
+            <p className="text-sm font-bold text-[#111]">₹{ride?.fare}</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-4 py-3">
-          <i className="text-xl text-blue-600 ri-map-pin-3-line"></i>
-          <div>
-            <h4 className="text-base font-semibold text-gray-800">
-              Destination
-            </h4>
-            <p className="text-sm text-gray-500">{props.ride?.destination}</p>
+        {/* Route */}
+        <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm mb-5">
+          <div className="flex items-start gap-3 p-4">
+            <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+              <i className="text-white text-sm ri-map-pin-fill" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-[#6B7280] font-medium">Pickup</p>
+              <h3 className="text-sm font-semibold text-[#111] mt-0.5 truncate">{ride?.pickup}</h3>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-4">
+            <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
+              <i className="text-white text-sm ri-map-pin-3-line" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-[#6B7280] font-medium">Destination</p>
+              <h3 className="text-sm font-semibold text-[#111] mt-0.5 truncate">{ride?.destination}</h3>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-start gap-4 py-3">
-          <i className="text-xl text-yellow-600 ri-money-rupee-circle-line"></i>
-          <div>
-            <h4 className="text-base font-semibold text-gray-800">Fare</h4>
-            <p className="text-sm text-gray-500">₹{props.ride?.fare}</p>
-          </div>
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setRidePopUpPanel(false)}
+            className="flex-1 bg-[#F6F6F6] text-[#6B7280] font-semibold py-4 rounded-2xl text-sm active:scale-95 transition-transform"
+          >
+            Ignore
+          </button>
+          <button
+            onClick={confirmRide}
+            className="flex-1 bg-black text-white font-bold py-4 rounded-2xl text-sm active:scale-95 transition-transform shadow-md"
+          >
+            Accept Ride
+          </button>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="mt-5 flex flex-col gap-2">
-        <button
-          onClick={() => {
-            props.setConfirmRidePopUpPanel(true);
-            props.confirmRide();
-            props.acceptRide();
-          }}
-          className=" bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition"
-        >
-          Accept Ride
-        </button>
-        <button
-          onClick={() => {
-            props.setRidePopUpPanel(false);
-
-          }}
-          className=" bg-red-100 hover:bg-red-200 text-red-600 font-semibold py-2 rounded-lg transition"
-        >
-          Ignore
-        </button>
       </div>
     </div>
   );

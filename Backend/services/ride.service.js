@@ -70,7 +70,7 @@ module.exports.createRide = async ({
   }
   const fare = await getFare(pickup, destination);
 
-  const ride = rideModel.create({
+  const ride = await rideModel.create({
     user,
     pickup,
     destination,
@@ -128,11 +128,6 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
     { _id: rideId },
     { status: 'ongoing' }
   );
-  sendMessageToSocketId(ride.user.socketId, {
-    event: 'ride-started',
-    data: ride
-  }
-  )
   return ride;
 };
 
@@ -163,7 +158,5 @@ module.exports.endRide = async ({ rideId, captain }) => {
   if (!updatedRide) {
     throw new Error('Failed to update ride status.');
   }
-return ride;
-
-
+  return updatedRide;
 }

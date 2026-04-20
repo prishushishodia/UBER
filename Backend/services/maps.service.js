@@ -1,92 +1,63 @@
 const axios = require("axios");
 const captainModel = require("../models/captain.model");
 
+// Photon (photon.komoot.io) — free, no key, OpenStreetMap-based, built for autocomplete
+const photonGet = (url) => axios.get(url, { headers: { "User-Agent": "UberCloneApp/1.0" } });
+
+function photonLabel(props) {
+  return [props.name, props.street, props.city, props.state, props.country]
+    .filter(Boolean)
+    .join(", ");
+}
 
 module.exports.getAddressCoordinate = async (address) => {
-  const apiKey = process.env.GOOGLE_MAPS_API;
-  const url = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(
-    address
-  )}&key=${apiKey}`;
-
-  try {
-    const response = await axios.get(url);
-    if (response.data.status === "OK") {
-      const location = response.data.results[0].geometry.location;
-      return {
-        ltd: location.lat,
-        lng: location.lng,
-      };
-    } else {
-      throw new Error("Unable to fetch coordinates");
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(address)}&limit=1`;
+  const response = await photonGet(url);
+  const features = response.data.features;
+  if (!features || !features.length) throw new Error("Unable to fetch coordinates");
+  const [lng, lat] = features[0].geometry.coordinates;
+  return { ltd: lat, lng };
 };
 
 module.exports.getDistanceTime = async (origin, destination) => {
-  if (!origin || !destination) {
-    throw new Error("Origin and destination both are required");
-  }
+  if (!origin || !destination) throw new Error("Origin and destination are required");
 
-  const apiKey = process.env.GOOGLE_MAPS_API;
-  const url = `https://maps.gomaps.pro/maps/api/distancematrix/json?units=metric&origins=${encodeURIComponent(
-    origin
-  )}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
+  const [originCoords, destCoords] = await Promise.all([
+    module.exports.getAddressCoordinate(origin),
+    module.exports.getAddressCoordinate(destination),
+  ]);
 
-  try {
-    const response = await axios.get(url);
+  // OSRM public routing API — free, no key
+  const url = `http://router.project-osrm.org/route/v1/driving/${originCoords.lng},${originCoords.ltd};${destCoords.lng},${destCoords.ltd}?overview=false`;
+  const response = await axios.get(url);
 
-    if (response.data.status === "OK") {
-      if (response.data.rows[0].elements[0].status === "ZERO_RESULTS") {
-        throw new Error("no routes found");
-      }
-      return response.data.rows[0].elements[0];
-    } else {
-      throw new Error("Unable to fetch distance and time");
-    }
-  } catch (err) {
-    console.error("DistanceTime Error:", err.message);
-    throw err;
-  }
+  if (!response.data.routes || !response.data.routes.length) throw new Error("No routes found");
+
+  const route = response.data.routes[0];
+  return {
+    distance: { value: route.distance, text: `${(route.distance / 1000).toFixed(1)} km` },
+    duration: { value: route.duration, text: `${Math.round(route.duration / 60)} mins` },
+  };
 };
 
-
 module.exports.getAutoCompleteSuggestions = async (input) => {
-  if(!input){
-    throw new Error('address query is required')
-  }
-  const apiKey = process.env.GOOGLE_MAPS_API;
+  if (!input) throw new Error("address query is required");
 
-   const url = `https://maps.gomaps.pro/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=6`;
+  const response = await photonGet(url);
 
-   try {
-    const response= await axios.get(url);
-    if(response.data.status==="OK"){
- const descriptions = response.data.predictions.map(p => p.description);
-  return descriptions;
-    }else {
-      throw new Error('unable to fetch suggestions')
-    }
-    
-   } catch (err) {
-    console.log(err);
-    throw err;
-    
-   }
-
-}
-
+  if (!response.data.features || !response.data.features.length) return [];
+  return response.data.features.map((f) => photonLabel(f.properties));
+};
 
 module.exports.getCaptainsInTheRadius = async (lng, ltd, radius) => {
-const captains = await captainModel.find({
+  const captains = await captainModel.find({
+    socketId: { $ne: null },
     location: {
       $geoWithin: {
-        $centerSphere: [[lng, ltd], radius / 6371] // radius in kilometers
-      }
-    }
+        $centerSphere: [[lng, ltd], radius / 6371],
+      },
+    },
   });
-
   return captains;
-}
+};

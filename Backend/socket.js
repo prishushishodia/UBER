@@ -51,8 +51,13 @@ function initializeSocket(server) {
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log(`Client disconnected: ${socket.id}`);
+      // Clear stale socketId so disconnected captains don't receive ride requests
+      await Promise.all([
+        userModel.findOneAndUpdate({ socketId: socket.id }, { socketId: null }),
+        captainModel.findOneAndUpdate({ socketId: socket.id }, { socketId: null }),
+      ]);
     });
   });
 }

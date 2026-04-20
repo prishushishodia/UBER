@@ -24,9 +24,9 @@ module.exports.createRide = async (req, res) => {
     console.log(pickupCoordinates);
 
     const captainsInRadius = await mapsService.getCaptainsInTheRadius(
-      pickupCoordinates.lng, // Correct: Pass longitude first
-      pickupCoordinates.ltd, // Correct: Pass latitude second
-      2
+      pickupCoordinates.lng,
+      pickupCoordinates.ltd,
+      10
     );
     ride.otp = "";
 
