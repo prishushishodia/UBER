@@ -17,13 +17,22 @@ const CaptainHome = () => {
 
   const ridePopUpPanelRef = useRef(null);
   const confirmRidePopUpRef = useRef(null);
+  const bottomCardRef = useRef(null);
 
   const { socket } = useContext(SocketContext);
   const { captain } = useContext(CaptainDataContext);
 
+  // Entrance animation for bottom card
+  useEffect(() => {
+    if (bottomCardRef.current) {
+      gsap.from(bottomCardRef.current, {
+        y: 60, opacity: 0, duration: 0.65, ease: "power3.out", delay: 0.2,
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!socket || !captain?._id) return;
-
     socket.emit("join", { userId: captain._id, userType: "captain" });
 
     const updateLocation = () => {
@@ -37,7 +46,6 @@ const CaptainHome = () => {
         });
       }
     };
-
     const locationInterval = setInterval(updateLocation, 10000);
     updateLocation();
     return () => clearInterval(locationInterval);
@@ -73,28 +81,28 @@ const CaptainHome = () => {
   }, []);
 
   useGSAP(() => {
-    gsap.to(ridePopUpPanelRef.current, { y: ridePopUpPanel ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(ridePopUpPanelRef.current, { y: ridePopUpPanel ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [ridePopUpPanel]);
 
   useGSAP(() => {
-    gsap.to(confirmRidePopUpRef.current, { y: confirmRidePopUpPanel ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(confirmRidePopUpRef.current, { y: confirmRidePopUpPanel ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [confirmRidePopUpPanel]);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-[#F6F6F6]">
+    <div className="h-screen w-screen relative overflow-hidden bg-[#0A0A0A]">
       {/* Logo */}
       <img
-        className="w-14 absolute left-4 top-4 z-20"
+        className="w-14 brightness-0 invert absolute left-4 top-4 z-20"
         src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
         alt="Uber"
       />
 
       {/* Logout */}
       <Link
-        to="/home"
-        className="absolute right-4 top-4 z-20 h-10 w-10 bg-white flex items-center justify-center rounded-full shadow-md"
+        to="/captain-login"
+        className="absolute right-4 top-4 z-20 h-10 w-10 bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center rounded-full"
       >
-        <i className="ri-logout-box-r-line text-[#111]" />
+        <i className="ri-logout-box-r-line text-white text-base" />
       </Link>
 
       {/* Map */}
@@ -102,11 +110,12 @@ const CaptainHome = () => {
         <LiveTracking />
       </div>
 
-      {/* Bottom captain details card */}
-      <div className="absolute bottom-0 left-0 right-0 z-30">
-        <div className="bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-6">
-          <div className="flex justify-center mb-3">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+      {/* Bottom captain card */}
+      <div ref={bottomCardRef} className="absolute bottom-0 left-0 right-0 z-30">
+        <div className="bg-black rounded-t-3xl shadow-2xl border-t border-white/10 px-5 pt-4 pb-7">
+          {/* Drag pill */}
+          <div className="flex justify-center mb-4">
+            <div className="w-10 h-1 bg-white/30 rounded-full" />
           </div>
           <CaptainDetails />
         </div>
@@ -122,7 +131,7 @@ const CaptainHome = () => {
         />
       </div>
 
-      {/* Confirm ride popup — full height */}
+      {/* Confirm ride popup */}
       <div ref={confirmRidePopUpRef} className="fixed inset-0 z-50">
         <ConfirmRidePopUp
           ride={ride}

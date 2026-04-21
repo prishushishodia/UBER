@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
@@ -9,15 +8,13 @@ import SocketProvider from "./context/SocketContext.jsx";
 
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <CaptainContext>
+  <CaptainContext>
     <UserContext>
       <SocketProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </SocketProvider>
     </UserContext>
-    </CaptainContext>
-  </StrictMode>
+  </CaptainContext>
 );

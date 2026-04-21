@@ -1,6 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import gsap from "gsap";
 import { CaptainDataContext } from "../context/CaptainContext";
 
 const CaptainLogin = () => {
@@ -8,6 +9,19 @@ const CaptainLogin = () => {
   const [password, setPassword] = useState("");
   const { setCaptain } = useContext(CaptainDataContext);
   const navigate = useNavigate();
+
+  const logoRef = useRef(null);
+  const headingRef = useRef(null);
+  const formRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.from(logoRef.current, { opacity: 0, y: -24, duration: 0.55 })
+      .from(headingRef.current.children, { opacity: 0, y: 18, stagger: 0.1, duration: 0.45 }, "-=0.2")
+      .from(Array.from(formRef.current.children), { opacity: 0, y: 22, stagger: 0.1, duration: 0.4 }, "-=0.15")
+      .from(bottomRef.current, { opacity: 0, y: 16, duration: 0.4 }, "-=0.1");
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -28,80 +42,98 @@ const CaptainLogin = () => {
     }
   };
 
+  const inputClass =
+    "w-full bg-[#1C1C1C] border-2 border-[#3A3A3A] rounded-2xl px-4 py-3.5 text-white text-sm placeholder:text-[#666666] focus:outline-none focus:border-yellow-400 transition";
+
+  const labelClass =
+    "block text-xs font-bold text-[#AAAAAA] mb-1.5 uppercase tracking-widest";
+
   return (
-    <div className="min-h-screen bg-[#F6F6F6] flex flex-col justify-between px-6 py-10">
+    <div className="min-h-screen bg-[#111111] flex flex-col justify-between px-6 py-12">
       <div>
         {/* Logo */}
-        <div className="flex items-center gap-2 mb-8">
+        <div ref={logoRef} className="flex items-center gap-2.5 mb-10">
           <img
-            className="w-10"
+            className="w-10 brightness-0 invert"
             src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
             alt="Uber"
           />
-          <span className="text-sm font-bold text-white bg-black px-2 py-0.5 rounded-md tracking-wide">CAPTAIN</span>
+          <span className="text-xs font-extrabold text-black bg-yellow-400 px-2.5 py-1 rounded-lg tracking-widest uppercase">
+            Captain
+          </span>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#111] mb-1">Welcome back</h1>
-        <p className="text-[#6B7280] text-sm mb-8">Sign in to your captain account</p>
+        {/* Heading */}
+        <div ref={headingRef} className="mb-9">
+          <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-[#888888] text-sm">Sign in to start earning</p>
+        </div>
 
-        <form onSubmit={submitHandler} className="flex flex-col gap-4">
+        {/* Form */}
+        <form ref={formRef} onSubmit={submitHandler} className="flex flex-col gap-5">
           <div>
-            <label className="block text-xs font-semibold text-[#6B7280] mb-1 uppercase tracking-wide">
-              Email
-            </label>
+            <label className={labelClass}>Email</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               type="email"
               placeholder="email@example.com"
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#111] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition shadow-sm"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#6B7280] mb-1 uppercase tracking-wide">
-              Password
-            </label>
+            <label className={labelClass}>Password</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               type="password"
               placeholder="Enter your password"
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#111] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition shadow-sm"
+              className={inputClass}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-black text-white font-semibold py-4 rounded-2xl text-sm tracking-wide mt-2 active:scale-95 transition-transform"
+            className="w-full bg-yellow-400 text-black font-extrabold py-4 rounded-2xl text-sm tracking-wide mt-1 active:scale-95 transition-transform"
           >
-            Login
+            Sign In
           </button>
+
+          <p className="text-center text-sm text-[#888888]">
+            New captain?{" "}
+            <Link to="/captain-signup" className="text-yellow-400 font-bold">
+              Register here
+            </Link>
+          </p>
+
+          {/* Test credentials */}
+          <div className="bg-[#1C1C1C] border-2 border-yellow-400/30 rounded-2xl px-4 py-3">
+            <p className="text-xs font-extrabold text-yellow-400 mb-2">Test credentials</p>
+            <p className="text-sm text-[#CCCCCC]">
+              ID: <span className="font-bold text-white">trial1@gmail.com</span>
+            </p>
+            <p className="text-sm text-[#CCCCCC]">
+              Password: <span className="font-bold text-white">trial1234</span>
+            </p>
+          </div>
         </form>
-
-        <p className="text-center text-sm text-[#6B7280] mt-5">
-          New captain?{" "}
-          <Link to="/captain-signup" className="text-black font-semibold underline">
-            Register here
-          </Link>
-        </p>
-
-        {/* Test credentials */}
-        <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
-          <p className="text-xs font-bold text-yellow-700 mb-1">Test credentials</p>
-          <p className="text-xs text-yellow-800">ID: <span className="font-semibold">trial1@gmail.com</span></p>
-          <p className="text-xs text-yellow-800">Password: <span className="font-semibold">trial1234</span></p>
-        </div>
       </div>
 
-      <Link
-        to="/login"
-        className="w-full flex items-center justify-center bg-[#00C853] text-white font-semibold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform"
-      >
-        Sign in as Rider instead
-      </Link>
+      {/* Switch to rider */}
+      <div ref={bottomRef} className="mt-8">
+        <Link
+          to="/login"
+          className="w-full flex items-center justify-center gap-2 bg-[#1C1C1C] border-2 border-[#3A3A3A] text-[#CCCCCC] font-semibold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform"
+        >
+          <i className="ri-user-line text-base" />
+          Switch to Rider login
+        </Link>
+      </div>
     </div>
   );
 };
