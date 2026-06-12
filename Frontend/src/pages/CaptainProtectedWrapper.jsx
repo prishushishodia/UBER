@@ -9,7 +9,7 @@ const CaptainProtectedWrapper = ({
 
     const token = localStorage.getItem('token')
     const navigate = useNavigate()
-    const { captain, setCaptain } = useContext(CaptainDataContext)
+    const { setCaptain } = useContext(CaptainDataContext)
     const [ isLoading, setIsLoading ] = useState(true)
 
 
@@ -41,7 +41,13 @@ const CaptainProtectedWrapper = ({
 
     if (isLoading) {
         return (
-            <div>Loading...</div>
+            <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-night">
+                <div className="flex items-center gap-2.5">
+                    <span className="text-3xl font-extrabold tracking-tight text-white">Uber</span>
+                    <span className="rounded-lg bg-gold px-2.5 py-1 text-[10px] font-extrabold tracking-[0.18em] text-night uppercase">Captain</span>
+                </div>
+                <span className="spinner text-night-fog" />
+            </div>
         )
     }
 

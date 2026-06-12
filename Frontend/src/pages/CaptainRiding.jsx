@@ -4,6 +4,7 @@ import FinishRide from "../components/FinishRide";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import LiveTracking from "../components/LiveTracking";
+import Logo from "../components/Logo";
 
 const CaptainRiding = () => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
@@ -12,6 +13,10 @@ const CaptainRiding = () => {
 
   const location = useLocation();
   const rideData = location.state?.ride;
+
+  const riderFirstName = rideData?.user?.fullname?.firstname || "";
+  const riderLastName = rideData?.user?.fullname?.lastname || "";
+  const riderInitials = (riderFirstName[0] || "") + (riderLastName[0] || "") || "R";
 
   useEffect(() => {
     gsap.set(finishRidePanelRef.current, { y: "100%" });
@@ -28,67 +33,62 @@ const CaptainRiding = () => {
   }, [finishRidePanel]);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-[#0A0A0A]">
-      {/* Logo */}
-      <img
-        className="w-14 brightness-0 invert absolute left-4 top-4 z-20"
-        src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-        alt="Uber"
-      />
-
-      {/* Back button */}
-      <Link
-        to="/captain-home"
-        className="absolute right-4 top-4 z-20 h-10 w-10 bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center rounded-full"
-      >
-        <i className="ri-home-5-line text-white text-base" />
-      </Link>
+    <div className="relative h-screen w-screen overflow-hidden bg-night">
+      {/* Top bar */}
+      <div className="absolute top-0 right-0 left-0 z-20 flex items-center justify-between px-4 pt-4">
+        <div className="animate-fade-in rounded-2xl border border-white/10 bg-night/80 px-3.5 py-2 shadow-lg backdrop-blur-sm">
+          <Logo variant="dark" size="sm" badge="Captain" />
+        </div>
+        <Link to="/captain-home" aria-label="Back to home" className="map-action-dark animate-fade-in">
+          <i className="ri-home-5-line" />
+        </Link>
+      </div>
 
       {/* Map */}
       <div className="absolute inset-0 z-0">
-        <LiveTracking />
+        <LiveTracking variant="dark" />
       </div>
 
-      {/* Bottom ride bar */}
-      <div ref={bottomBarRef} className="absolute bottom-0 left-0 right-0 z-30">
-        <div className="bg-black rounded-t-3xl border-t border-white/10 shadow-2xl px-5 pt-4 pb-7">
+      {/* Bottom trip bar */}
+      <div ref={bottomBarRef} className="absolute right-0 bottom-0 left-0 z-30">
+        <div className="sheet-dark px-5 pt-4 pb-7">
           {/* Drag pill */}
-          <div className="flex justify-center mb-4">
-            <div className="w-10 h-1 bg-white/30 rounded-full" />
+          <div className="mb-4">
+            <div className="grab-dark" />
           </div>
 
           {/* Status chip */}
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-1.5 bg-[#00C853]/10 border border-[#00C853]/20 rounded-full px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#00C853] animate-pulse" />
-              <span className="text-xs font-bold text-[#00C853] tracking-wide">Ride in progress</span>
-            </div>
+          <div className="mb-4 flex justify-center">
+            <span className="chip border border-go/20 bg-go/10 text-go">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-go" />
+              Trip in progress
+            </span>
           </div>
 
-          {/* Destination info */}
-          <div className="bg-white/5 border border-white/15 rounded-2xl px-4 py-4 mb-4">
-            <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">Heading to</p>
-            <h3 className="text-base font-extrabold text-white truncate">
+          {/* Destination card */}
+          <div className="tile-dark mb-4 px-4 py-4">
+            <p className="mb-1 text-[10px] font-bold tracking-[0.18em] text-night-fog uppercase">
+              <i className="ri-navigation-fill mr-1 text-gold" />
+              Heading to
+            </p>
+            <h3 className="truncate text-base font-extrabold text-white">
               {rideData?.destination || "—"}
             </h3>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="h-5 w-5 rounded-full bg-[#FFD60A] flex items-center justify-center">
-                <span className="text-black text-[9px] font-extrabold uppercase">
-                  {(rideData?.user?.fullname?.firstname?.[0] || "") + (rideData?.user?.fullname?.lastname?.[0] || "")}
-                </span>
+            <div className="mt-3 flex items-center gap-2.5 border-t border-night-line pt-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold">
+                <span className="text-[10px] font-extrabold text-night uppercase">{riderInitials}</span>
               </div>
-              <p className="text-xs text-white/60">
-                {rideData?.user?.fullname?.firstname || "Rider"} · ₹{rideData?.fare}
+              <p className="text-xs text-night-fog">
+                <span className="font-bold text-white capitalize">{riderFirstName || "Rider"}</span>
+                {" · "}₹{rideData?.fare} cash on arrival
               </p>
             </div>
           </div>
 
-          {/* Complete button */}
-          <button
-            onClick={() => setFinishRidePanel(true)}
-            className="w-full bg-[#FFD60A] text-black font-extrabold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform shadow-lg shadow-[#FFD60A]/20"
-          >
-            Complete Ride
+          {/* Complete trip */}
+          <button onClick={() => setFinishRidePanel(true)} className="btn-gold">
+            <i className="ri-flag-2-line text-base" />
+            Complete trip
           </button>
         </div>
       </div>

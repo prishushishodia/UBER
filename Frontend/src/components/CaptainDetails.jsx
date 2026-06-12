@@ -1,74 +1,75 @@
-import React, { useContext, useRef, useEffect } from "react";
+import React, { useContext } from "react";
 import { CaptainDataContext } from "../context/CaptainContext";
-import gsap from "gsap";
+
+const stats = [
+  { icon: "ri-time-line", value: "10.2", label: "Hours online" },
+  { icon: "ri-route-line", value: "8", label: "Trips today" },
+  { icon: "ri-star-fill", value: "4.8", label: "Rating", highlight: true },
+];
 
 const CaptainDetails = () => {
   const { captain } = useContext(CaptainDataContext);
-  const cardRef = useRef(null);
-  const statsRef = useRef(null);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-    gsap.from(cardRef.current, { opacity: 0, y: 30, duration: 0.55, ease: "power3.out" });
-    if (statsRef.current) {
-      gsap.from(Array.from(statsRef.current.children), {
-        opacity: 0, y: 16, scale: 0.92, stagger: 0.1, duration: 0.45, delay: 0.25, ease: "back.out(1.5)",
-      });
-    }
-  }, []);
 
   if (!captain?.fullname) {
-    return <p className="text-center py-4 text-sm text-[#888888]">Loading...</p>;
+    return (
+      <div className="flex items-center justify-center gap-2 py-6 text-night-fog">
+        <span className="spinner" />
+        <p className="text-sm">Loading your profile…</p>
+      </div>
+    );
   }
 
   const initials =
-    (captain.fullname.firstname?.[0] || "") +
-    (captain.fullname.lastname?.[0] || "") || "C";
+    (captain.fullname.firstname?.[0] || "") + (captain.fullname.lastname?.[0] || "") || "C";
 
   return (
-    <div ref={cardRef}>
-      {/* Captain identity row */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          {/* Avatar with online pulse */}
+    <div>
+      {/* Identity + earnings */}
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
+          {/* Avatar with online indicator */}
           <div className="relative">
-            <div className="h-12 w-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-              <span className="text-black text-base font-extrabold uppercase">{initials}</span>
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gold">
+              <span className="text-base font-extrabold text-night uppercase">{initials}</span>
             </div>
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[#00C853] border-2 border-[#161616]">
-              <span className="absolute inset-0 rounded-full bg-[#00C853] animate-ping opacity-75" />
+            <span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-night bg-go">
+              <span className="absolute inset-0 animate-ping rounded-full bg-go opacity-75" />
             </span>
           </div>
           <div>
             <h4 className="text-sm font-extrabold text-white capitalize">
               {captain.fullname.firstname} {captain.fullname.lastname}
             </h4>
-            <p className="text-xs text-[#888888] mt-0.5">{captain.vehicle?.plate || "—"}</p>
+            <span className="mt-1 inline-block rounded-md border border-night-line bg-night-soft px-2 py-0.5 text-[10px] font-bold tracking-widest text-night-fog uppercase">
+              {captain.vehicle?.plate || "—"}
+            </span>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xl font-extrabold text-yellow-400">₹300</p>
-          <p className="text-xs text-[#888888]">Today</p>
+          <p className="text-2xl font-extrabold tracking-tight text-gold">₹300</p>
+          <p className="text-[11px] font-medium text-night-fog">Earned today</p>
         </div>
       </div>
 
-      {/* Stats row */}
-      <div ref={statsRef} className="grid grid-cols-3 gap-2.5">
-        <div className="bg-[#1E1E1E] border-2 border-[#2E2E2E] rounded-2xl p-3.5 text-center">
-          <i className="ri-time-line text-lg text-yellow-400" />
-          <p className="text-base font-extrabold text-white mt-1">10.2</p>
-          <p className="text-[10px] text-[#888888] mt-0.5">Hrs online</p>
-        </div>
-        <div className="bg-[#1E1E1E] border-2 border-[#2E2E2E] rounded-2xl p-3.5 text-center">
-          <i className="ri-route-line text-lg text-yellow-400" />
-          <p className="text-base font-extrabold text-white mt-1">8</p>
-          <p className="text-[10px] text-[#888888] mt-0.5">Rides</p>
-        </div>
-        <div className="bg-yellow-400 rounded-2xl p-3.5 text-center">
-          <i className="ri-star-fill text-lg text-black" />
-          <p className="text-base font-extrabold text-black mt-1">4.8</p>
-          <p className="text-[10px] text-black/70 mt-0.5">Rating</p>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {stats.map((s, i) => (
+          <div
+            key={s.label}
+            className={`animate-fade-up rounded-2xl p-3.5 text-center ${
+              s.highlight ? "bg-gold" : "tile-dark"
+            }`}
+            style={{ animationDelay: `${200 + i * 90}ms` }}
+          >
+            <i className={`${s.icon} text-lg ${s.highlight ? "text-night" : "text-gold"}`} />
+            <p className={`mt-1 text-base font-extrabold ${s.highlight ? "text-night" : "text-white"}`}>
+              {s.value}
+            </p>
+            <p className={`mt-0.5 text-[10px] font-medium ${s.highlight ? "text-night/70" : "text-night-fog"}`}>
+              {s.label}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

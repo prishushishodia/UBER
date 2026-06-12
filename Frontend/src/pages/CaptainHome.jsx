@@ -9,6 +9,7 @@ import { SocketContext } from "../context/SocketContext";
 import { CaptainDataContext } from "../context/CaptainContext";
 import axios from "axios";
 import LiveTracking from "../components/LiveTracking";
+import Logo from "../components/Logo";
 
 const CaptainHome = () => {
   const [ridePopUpPanel, setRidePopUpPanel] = useState(false);
@@ -89,40 +90,35 @@ const CaptainHome = () => {
   }, [confirmRidePopUpPanel]);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-[#0A0A0A]">
-      {/* Logo */}
-      <img
-        className="w-14 brightness-0 invert absolute left-4 top-4 z-20"
-        src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-        alt="Uber"
-      />
-
-      {/* Logout */}
-      <Link
-        to="/captain-login"
-        className="absolute right-4 top-4 z-20 h-10 w-10 bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center rounded-full"
-      >
-        <i className="ri-logout-box-r-line text-white text-base" />
-      </Link>
+    <div className="relative h-screen w-screen overflow-hidden bg-night">
+      {/* Top bar */}
+      <div className="absolute top-0 right-0 left-0 z-20 flex items-center justify-between px-4 pt-4">
+        <div className="animate-fade-in rounded-2xl border border-white/10 bg-night/80 px-3.5 py-2 shadow-lg backdrop-blur-sm">
+          <Logo variant="dark" size="sm" badge="Captain" />
+        </div>
+        <Link to="/captain-login" aria-label="Sign out" className="map-action-dark animate-fade-in">
+          <i className="ri-logout-box-r-line" />
+        </Link>
+      </div>
 
       {/* Map */}
       <div className="absolute inset-0 z-0">
-        <LiveTracking />
+        <LiveTracking variant="dark" />
       </div>
 
       {/* Bottom captain card */}
-      <div ref={bottomCardRef} className="absolute bottom-0 left-0 right-0 z-30">
-        <div className="bg-black rounded-t-3xl shadow-2xl border-t border-white/10 px-5 pt-4 pb-7">
+      <div ref={bottomCardRef} className="absolute right-0 bottom-0 left-0 z-30">
+        <div className="sheet-dark px-5 pt-4 pb-7">
           {/* Drag pill */}
-          <div className="flex justify-center mb-4">
-            <div className="w-10 h-1 bg-white/30 rounded-full" />
+          <div className="mb-4">
+            <div className="grab-dark" />
           </div>
           <CaptainDetails />
         </div>
       </div>
 
-      {/* Ride popup */}
-      <div ref={ridePopUpPanelRef} className="fixed bottom-0 left-0 right-0 z-50">
+      {/* Incoming ride request */}
+      <div ref={ridePopUpPanelRef} className="fixed right-0 bottom-0 left-0 z-50">
         <RidePopUp
           ride={ride}
           confirmRide={confirmRide}
@@ -131,7 +127,7 @@ const CaptainHome = () => {
         />
       </div>
 
-      {/* Confirm ride popup */}
+      {/* OTP / start ride screen */}
       <div ref={confirmRidePopUpRef} className="fixed inset-0 z-50">
         <ConfirmRidePopUp
           ride={ride}

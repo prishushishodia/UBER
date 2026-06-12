@@ -9,8 +9,9 @@ import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/userContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LiveTracking from "../components/LiveTracking";
+import Logo from "../components/Logo";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -21,6 +22,8 @@ const Home = () => {
   const [fare, setFare] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
   const [ride, setRide] = useState(null);
+  const [formError, setFormError] = useState("");
+  const [findingFare, setFindingFare] = useState(false);
 
   const [vehiclePanel, setVehiclePanel] = useState(false);
   const [confirmRidePanel, setConfirmRidePanel] = useState(false);
@@ -96,20 +99,23 @@ const Home = () => {
 
   async function findTrip() {
     if (!pickup || !destination) {
-      return alert("Please enter both pickup and destination.");
+      setFormError("Add both a pickup point and a destination first.");
+      return;
     }
+    setFormError("");
+    setFindingFare(true);
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
-        {
-          params: { pickup, destination },
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+        params: { pickup, destination },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       setFare(response.data);
       setVehiclePanel(true);
     } catch (err) {
       console.error("fare error", err);
+      setFormError("Couldn't fetch fares for this route. Please try again.");
+    } finally {
+      setFindingFare(false);
     }
   }
 
@@ -137,143 +143,176 @@ const Home = () => {
   }, []);
 
   useGSAP(() => {
-    gsap.to(vehiclePanelRef.current, { y: vehiclePanel ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(vehiclePanelRef.current, { y: vehiclePanel ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [vehiclePanel]);
 
   useGSAP(() => {
-    gsap.to(confirmRidePanelRef.current, { y: confirmRidePanel ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(confirmRidePanelRef.current, { y: confirmRidePanel ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [confirmRidePanel]);
 
   useGSAP(() => {
-    gsap.to(vehicleFoundRef.current, { y: vehicleFound ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(vehicleFoundRef.current, { y: vehicleFound ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [vehicleFound]);
 
   useGSAP(() => {
-    gsap.to(waitingForDriverRef.current, { y: waitingForDriver ? "0%" : "100%", duration: 0.4, ease: "power2.out" });
+    gsap.to(waitingForDriverRef.current, { y: waitingForDriver ? "0%" : "100%", duration: 0.45, ease: "power3.out" });
   }, [waitingForDriver]);
 
-  const suggestions =
-    activeField === "pickup" ? pickupSuggestions : destinationSuggestions;
+  const suggestions = activeField === "pickup" ? pickupSuggestions : destinationSuggestions;
   const showSuggestions = activeField !== null && suggestions.length > 0;
+  const firstName = user?.fullname?.firstname;
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-[#F6F6F6]">
-      {/* Logo */}
-      <img
-        className="w-14 absolute left-4 top-4 z-20"
-        src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-        alt="Uber"
-      />
-
-      {/* Logout */}
-      <button
-        onClick={async () => {
-          try {
-            await axios.get(`${import.meta.env.VITE_BASE_URL}/users/logout`, {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-          } finally {
-            localStorage.removeItem("token");
-            navigate("/login");
-          }
-        }}
-        className="absolute right-4 top-4 z-20 h-10 w-10 bg-white flex items-center justify-center rounded-full shadow-md"
-      >
-        <i className="ri-logout-box-r-line text-[#111]" />
-      </button>
+    <div className="relative h-screen w-screen overflow-hidden bg-mist">
+      {/* Top bar */}
+      <div className="absolute top-0 right-0 left-0 z-20 flex items-center justify-between px-4 pt-4">
+        <div className="animate-fade-in rounded-2xl bg-white/90 px-3.5 py-2 shadow-lg shadow-ink/5 backdrop-blur-sm">
+          <Logo size="sm" />
+        </div>
+        <button
+          aria-label="Sign out"
+          onClick={async () => {
+            try {
+              await axios.get(`${import.meta.env.VITE_BASE_URL}/users/logout`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+              });
+            } finally {
+              localStorage.removeItem("token");
+              navigate("/login");
+            }
+          }}
+          className="map-action animate-fade-in"
+        >
+          <i className="ri-logout-box-r-line" />
+        </button>
+      </div>
 
       {/* Map */}
       <div className="absolute inset-0 z-0">
         <LiveTracking />
       </div>
 
-      {/* Bottom booking card */}
-      <div className="absolute bottom-0 left-0 right-0 z-30">
-        <div className="bg-white rounded-t-3xl shadow-2xl">
+      {/* Bottom booking sheet */}
+      <div className="absolute right-0 bottom-0 left-0 z-30">
+        <div className="sheet animate-fade-up">
           {/* Drag pill */}
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+          <div className="pt-3 pb-1">
+            <div className="grab" />
           </div>
 
-          <div className="px-5 pt-2 pb-5">
+          <div className="px-5 pt-2 pb-6">
             {/* Header */}
-            <h2 className="text-xl font-bold text-[#111] mb-4">
-              {activeField ? "Search location" : "Where to?"}
-            </h2>
+            <div className="mb-4">
+              {!activeField && firstName && (
+                <p className="text-xs font-semibold tracking-wide text-fog">
+                  Hey {firstName} 👋
+                </p>
+              )}
+              <h2 className="mt-0.5 text-xl font-extrabold tracking-tight text-ink">
+                {activeField ? "Search location" : "Where to?"}
+              </h2>
+            </div>
 
-            {/* Inputs with vertical connector */}
-            <div className="flex items-stretch gap-3 mb-3">
-              {/* Connector dots + line */}
-              <div className="flex flex-col items-center py-3 gap-0 flex-shrink-0">
-                <div className="w-3 h-3 rounded-full bg-black" />
-                <div className="flex-1 w-px bg-gray-300 my-1" style={{ minHeight: 20 }} />
-                <div className="w-3 h-3 rounded-full border-2 border-[#00C853] bg-[#00C853]" />
+            {/* Inputs with route connector */}
+            <div className="mb-3 flex items-stretch gap-3">
+              {/* Connector: dot → dashed line → square */}
+              <div className="flex flex-shrink-0 flex-col items-center py-4">
+                <span className="h-2.5 w-2.5 rounded-full bg-ink" />
+                <span
+                  className="my-1.5 w-px flex-1 border-l border-dashed border-fog/50"
+                  style={{ minHeight: 24 }}
+                />
+                <span className="h-2.5 w-2.5 bg-go" />
               </div>
 
               {/* Input fields */}
-              <div className="flex-1 flex flex-col gap-2">
-                <input
-                  type="text"
-                  value={pickup}
-                  placeholder="Add a pickup location"
-                  onChange={(e) => {
-                    setPickup(e.target.value);
-                    fetchSuggestions(e.target.value, "pickup");
-                  }}
-                  onFocus={() => setActiveField("pickup")}
-                  className="w-full bg-[#F6F6F6] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition"
-                />
-                <input
-                  type="text"
-                  value={destination}
-                  placeholder="Enter your destination"
-                  onChange={(e) => {
-                    setDestination(e.target.value);
-                    fetchSuggestions(e.target.value, "destination");
-                  }}
-                  onFocus={() => setActiveField("destination")}
-                  className="w-full bg-[#F6F6F6] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition"
-                />
+              <div className="flex flex-1 flex-col gap-2">
+                {["pickup", "destination"].map((field) => {
+                  const value = field === "pickup" ? pickup : destination;
+                  const setValue = field === "pickup" ? setPickup : setDestination;
+                  const clear = () => {
+                    setValue("");
+                    field === "pickup" ? setPickupSuggestions([]) : setDestinationSuggestions([]);
+                  };
+                  return (
+                    <div key={field} className="relative">
+                      <input
+                        type="text"
+                        value={value}
+                        placeholder={field === "pickup" ? "Add a pickup point" : "Where are you going?"}
+                        onChange={(e) => {
+                          setValue(e.target.value);
+                          fetchSuggestions(e.target.value, field);
+                        }}
+                        onFocus={() => setActiveField(field)}
+                        className={`w-full rounded-xl bg-mist py-3 pr-9 pl-4 text-sm font-medium text-ink transition outline-none placeholder:font-normal placeholder:text-fog/60 focus:ring-2 focus:ring-ink ${
+                          activeField === field ? "ring-2 ring-ink" : ""
+                        }`}
+                      />
+                      {value && (
+                        <button
+                          aria-label={`Clear ${field}`}
+                          onClick={clear}
+                          className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer rounded-full p-1 text-fog transition hover:text-ink"
+                        >
+                          <i className="ri-close-circle-fill text-base" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Suggestions — inline below inputs */}
+            {/* Inline error */}
+            {formError && !activeField && (
+              <div className="animate-fade-in mb-3 flex items-start gap-2 rounded-xl border border-danger/20 bg-danger/5 px-3.5 py-2.5">
+                <i className="ri-error-warning-line mt-0.5 text-sm text-danger" />
+                <p className="text-xs font-medium text-danger">{formError}</p>
+              </div>
+            )}
+
+            {/* Suggestions */}
             {showSuggestions && (
-              <div className="max-h-52 overflow-y-auto border-t border-gray-100 mt-1 mb-2">
+              <div className="mt-1 mb-2 max-h-52 overflow-y-auto border-t border-line">
                 {suggestions.map((s, i) => (
-                  <div
+                  <button
                     key={i}
                     onClick={() => handleSuggestionClick(s)}
-                    className="flex items-center gap-3 px-1 py-3 border-b border-gray-50 active:bg-gray-50 cursor-pointer"
+                    className="flex w-full cursor-pointer items-center gap-3 border-b border-line/60 px-1 py-3 text-left transition active:bg-mist"
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#F6F6F6] flex items-center justify-center flex-shrink-0">
-                      <i className="ri-map-pin-line text-[#111] text-sm" />
-                    </div>
-                    <p className="text-sm text-[#111] font-medium leading-snug">{s}</p>
-                  </div>
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-mist">
+                      <i className="ri-map-pin-2-fill text-sm text-soot" />
+                    </span>
+                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{s}</p>
+                    <i className="ri-arrow-left-up-line flex-shrink-0 text-sm text-fog/60" />
+                  </button>
                 ))}
               </div>
             )}
 
-            {/* Find Trip button — show when not actively searching */}
-            {!activeField && (
-              <button
-                onClick={findTrip}
-                className="w-full bg-black text-white font-semibold py-4 rounded-2xl text-sm tracking-wide mt-1 active:scale-95 transition-transform"
-              >
-                Find Trip
+            {/* Primary action */}
+            {!activeField ? (
+              <button onClick={findTrip} disabled={findingFare} className="btn-ink mt-1">
+                {findingFare ? (
+                  <>
+                    <span className="spinner" /> Getting fares…
+                  </>
+                ) : (
+                  <>
+                    Find a trip
+                    <i className="ri-search-line text-base" />
+                  </>
+                )}
               </button>
-            )}
-
-            {/* Dismiss suggestions button */}
-            {activeField && (
+            ) : (
               <button
                 onClick={() => {
                   setActiveField(null);
                   setPickupSuggestions([]);
                   setDestinationSuggestions([]);
                 }}
-                className="w-full text-sm text-[#6B7280] py-2 mt-1 active:text-black transition-colors"
+                className="mt-1 w-full cursor-pointer py-2 text-sm font-semibold text-fog transition-colors active:text-ink"
               >
                 Done
               </button>
@@ -283,7 +322,7 @@ const Home = () => {
       </div>
 
       {/* Slide-up panels */}
-      <div ref={vehiclePanelRef} className="fixed bottom-0 left-0 right-0 z-50">
+      <div ref={vehiclePanelRef} className="fixed right-0 bottom-0 left-0 z-50">
         <VehiclePanel
           selectVehicle={setVehicleType}
           fare={fare}
@@ -292,7 +331,7 @@ const Home = () => {
         />
       </div>
 
-      <div ref={confirmRidePanelRef} className="fixed bottom-0 left-0 right-0 z-50">
+      <div ref={confirmRidePanelRef} className="fixed right-0 bottom-0 left-0 z-50">
         <ConfirmRide
           vehicleType={vehicleType}
           setVehiclePanel={setVehiclePanel}
@@ -305,11 +344,11 @@ const Home = () => {
         />
       </div>
 
-      <div ref={vehicleFoundRef} className="fixed bottom-0 left-0 right-0 z-50">
+      <div ref={vehicleFoundRef} className="fixed right-0 bottom-0 left-0 z-50">
         <LookingForDriver ride={ride} setVehicleFound={setVehicleFound} />
       </div>
 
-      <div ref={waitingForDriverRef} className="fixed bottom-0 left-0 right-0 z-50">
+      <div ref={waitingForDriverRef} className="fixed right-0 bottom-0 left-0 z-50">
         <WaitingForDriver
           ride={ride}
           setVehicleFound={setVehicleFound}
