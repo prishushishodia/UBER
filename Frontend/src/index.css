@@ -1,1 +1,224 @@
 @import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens                                                      */
+/* ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Rider (light) palette */
+  --color-ink: #16181d; /* primary text / black surfaces */
+  --color-soot: #2a2d34; /* hover-black */
+  --color-mist: #f3f4f6; /* app background */
+  --color-line: #e6e8ec; /* hairline borders */
+  --color-fog: #6e7380; /* muted text */
+  --color-go: #06c167; /* Uber green accent */
+  --color-danger: #e64545;
+
+  /* Captain (dark) palette */
+  --color-night: #0c0d10; /* page background */
+  --color-night-soft: #16171c; /* raised cards */
+  --color-night-line: #272930; /* borders */
+  --color-night-fog: #9b9ea8; /* muted text */
+  --color-gold: #ffc043; /* captain accent */
+
+  /* Motion */
+  --animate-fade-up: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.45s ease-out both;
+  --animate-sonar: sonar 2s ease-out infinite;
+  --animate-pulse-soft: pulse-soft 2.2s ease-in-out infinite;
+  --animate-scan: scan 1.6s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes sonar {
+    0% {
+      transform: scale(0.35);
+      opacity: 0.85;
+    }
+    100% {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+  @keyframes scan {
+    0% {
+      transform: translateX(-110%);
+    }
+    100% {
+      transform: translateX(330%);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-mist font-sans text-ink antialiased;
+  }
+  ::selection {
+    @apply bg-ink text-white;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reusable components                                                */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* Buttons ------------------------------------------------------- */
+  .btn-ink,
+  .btn-go,
+  .btn-gold,
+  .btn-ghost,
+  .btn-ghost-dark {
+    @apply inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-bold tracking-wide transition-all duration-200 select-none active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-ink {
+    @apply bg-ink text-white shadow-lg shadow-ink/15 hover:bg-soot;
+  }
+  .btn-go {
+    @apply bg-go text-white shadow-lg shadow-go/20 hover:brightness-105;
+  }
+  .btn-gold {
+    @apply bg-gold text-night shadow-lg shadow-gold/20 hover:brightness-105;
+  }
+  .btn-ghost {
+    @apply border border-line bg-white text-soot hover:bg-mist;
+  }
+  .btn-ghost-dark {
+    @apply border border-night-line bg-night-soft text-night-fog hover:text-white;
+  }
+
+  /* Form fields ---------------------------------------------------- */
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3.5 text-sm text-ink shadow-sm transition outline-none placeholder:text-fog/60 focus:border-ink focus:ring-2 focus:ring-ink/10;
+  }
+  .field-dark {
+    @apply w-full rounded-xl border border-night-line bg-night-soft px-4 py-3.5 text-sm text-white transition outline-none placeholder:text-night-fog/50 focus:border-gold focus:ring-2 focus:ring-gold/15;
+  }
+  .form-label {
+    @apply mb-1.5 block text-[11px] font-bold tracking-[0.14em] text-fog uppercase;
+  }
+  .form-label-dark {
+    @apply mb-1.5 block text-[11px] font-bold tracking-[0.14em] text-night-fog uppercase;
+  }
+
+  /* Bottom sheets --------------------------------------------------- */
+  .sheet {
+    @apply rounded-t-[28px] bg-white shadow-[0_-12px_40px_rgba(10,12,16,0.18)];
+  }
+  .sheet-dark {
+    @apply rounded-t-[28px] border-t border-night-line bg-night shadow-[0_-12px_40px_rgba(0,0,0,0.6)];
+  }
+  .grab {
+    @apply mx-auto h-1.5 w-12 rounded-full bg-line;
+  }
+  .grab-dark {
+    @apply mx-auto h-1.5 w-12 rounded-full bg-night-line;
+  }
+
+  /* Cards / tiles ---------------------------------------------------- */
+  .tile {
+    @apply rounded-2xl border border-line bg-mist;
+  }
+  .tile-dark {
+    @apply rounded-2xl border border-night-line bg-night-soft;
+  }
+
+  /* Floating circular icon button (over the map) -------------------- */
+  .map-action {
+    @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white text-ink shadow-lg shadow-ink/10 transition active:scale-90;
+  }
+  .map-action-dark {
+    @apply flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-night/80 text-white shadow-lg backdrop-blur-sm transition active:scale-90;
+  }
+
+  /* Status chip ------------------------------------------------------ */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide;
+  }
+
+  /* Spinner ---------------------------------------------------------- */
+  .spinner {
+    @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Leaflet / map chrome                                               */
+/* ------------------------------------------------------------------ */
+.leaflet-container {
+  font-family: inherit;
+  background: #e9eaee;
+}
+.leaflet-control-attribution {
+  font-size: 9px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  color: #9aa0ab !important;
+  backdrop-filter: blur(4px);
+}
+.leaflet-control-attribution a {
+  color: #9aa0ab !important;
+}
+
+/* Custom live-position marker (injected via L.divIcon) */
+.live-marker {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+.live-marker__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(6, 193, 103, 0.3);
+  animation: sonar 2s ease-out infinite;
+}
+.live-marker__dot {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  border-radius: 9999px;
+  background: #06c167;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 8px rgba(10, 12, 16, 0.4);
+}
+.live-marker--gold .live-marker__ring {
+  background: rgba(255, 192, 67, 0.32);
+}
+.live-marker--gold .live-marker__dot {
+  background: #ffc043;
+}

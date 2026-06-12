@@ -1,8 +1,8 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../context/CaptainContext";
 import axios from "axios";
-import gsap from "gsap";
+import Logo from "../components/Logo";
 
 const CaptainSignup = () => {
   const navigate = useNavigate();
@@ -12,140 +12,213 @@ const CaptainSignup = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [vehicleColor, setVehicleColor] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [vehicleCapacity, setVehicleCapacity] = useState("");
   const [vehicleType, setVehicleType] = useState("");
-
-  const logoRef = useRef(null);
-  const headingRef = useRef(null);
-  const contentRef = useRef(null);
-
-  useEffect(() => {
-    gsap.from(logoRef.current, { opacity: 0, y: -20, duration: 0.5, ease: "power3.out" });
-    gsap.from(headingRef.current, { opacity: 0, y: 16, duration: 0.45, delay: 0.2, ease: "power3.out" });
-    gsap.from(Array.from(contentRef.current.querySelectorAll(".anim-field")), {
-      opacity: 0, y: 18, stagger: 0.08, duration: 0.4, delay: 0.35, ease: "power3.out",
-    });
-  }, []);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setError("");
+    setSubmitting(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/captains/register`,
-        {
-          fullname: { firstname: firstName, lastname: lastName },
-          email,
-          password,
-          vehicle: { colour: vehicleColor, plate: vehiclePlate, capacity: vehicleCapacity, vehicleType },
-        }
-      );
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, {
+        fullname: { firstname: firstName, lastname: lastName },
+        email,
+        password,
+        vehicle: {
+          colour: vehicleColor,
+          plate: vehiclePlate,
+          capacity: vehicleCapacity,
+          vehicleType,
+        },
+      });
       if (response.status === 200) {
         setCaptain(response.data.captain);
         localStorage.setItem("token", response.data.token);
         navigate("/captain-home");
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.errors?.[0]?.msg ||
+          "Couldn't create your account. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const inputClass =
-    "w-full bg-[#1C1C1C] border-2 border-[#3A3A3A] rounded-2xl px-4 py-3.5 text-white text-sm placeholder:text-[#666666] focus:outline-none focus:border-yellow-400 transition";
-  const labelClass =
-    "block text-xs font-bold text-[#AAAAAA] mb-1.5 uppercase tracking-widest";
-  const halfInputClass =
-    "w-1/2 bg-[#1C1C1C] border-2 border-[#3A3A3A] rounded-2xl px-4 py-3.5 text-white text-sm placeholder:text-[#666666] focus:outline-none focus:border-yellow-400 transition";
-
   return (
-    <div className="min-h-screen bg-[#111111] px-6 py-12 pb-24">
-      {/* Logo */}
-      <div ref={logoRef} className="flex items-center gap-2.5 mb-10">
-        <img
-          className="w-10 brightness-0 invert"
-          src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-          alt="Uber"
-        />
-        <span className="text-xs font-extrabold text-black bg-yellow-400 px-2.5 py-1 rounded-lg tracking-widest uppercase">
-          Captain
-        </span>
+    <div className="min-h-screen bg-night px-6 py-12 pb-16">
+      <Logo variant="dark" size="lg" badge="Captain" className="mb-10 animate-fade-in" />
+
+      <div className="animate-fade-up mb-9" style={{ animationDelay: "80ms" }}>
+        <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-white">Become a captain</h1>
+        <p className="text-sm text-night-fog">Create your driver account and start earning</p>
       </div>
 
-      {/* Heading */}
-      <div ref={headingRef} className="mb-9">
-        <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">
-          Join as a captain
-        </h1>
-        <p className="text-[#888888] text-sm">Create your driver account to start earning</p>
-      </div>
-
-      <form ref={contentRef} onSubmit={submitHandler} className="flex flex-col gap-5">
-        {/* Name */}
-        <div className="anim-field">
-          <label className={labelClass}>Full Name</label>
+      <form
+        onSubmit={submitHandler}
+        className="animate-fade-up flex flex-col gap-5"
+        style={{ animationDelay: "160ms" }}
+      >
+        {/* Personal details */}
+        <div>
+          <label className="form-label-dark">Full name</label>
           <div className="flex gap-3">
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required type="text" placeholder="First" className={halfInputClass} />
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} required type="text" placeholder="Last" className={halfInputClass} />
+            <input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              type="text"
+              autoComplete="given-name"
+              placeholder="First name"
+              className="field-dark w-1/2"
+            />
+            <input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              type="text"
+              autoComplete="family-name"
+              placeholder="Last name"
+              className="field-dark w-1/2"
+            />
           </div>
         </div>
 
-        {/* Email */}
-        <div className="anim-field">
-          <label className={labelClass}>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" placeholder="email@example.com" className={inputClass} />
+        <div>
+          <label className="form-label-dark" htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="field-dark"
+          />
         </div>
 
-        {/* Password */}
-        <div className="anim-field">
-          <label className={labelClass}>Password</label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} required type="password" placeholder="Create a password" className={inputClass} />
+        <div>
+          <label className="form-label-dark" htmlFor="password">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Create a password"
+              className="field-dark pr-12"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1 text-night-fog transition hover:text-gold"
+            >
+              <i className={showPassword ? "ri-eye-off-line" : "ri-eye-line"} />
+            </button>
+          </div>
         </div>
 
-        {/* Vehicle divider */}
-        <div className="anim-field pt-1">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-[#2A2A2A]" />
-            <span className="text-xs font-extrabold text-yellow-400 uppercase tracking-widest">Vehicle Info</span>
-            <div className="flex-1 h-px bg-[#2A2A2A]" />
+        {/* Vehicle section */}
+        <div className="pt-1">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-night-line" />
+            <span className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.18em] text-gold uppercase">
+              <i className="ri-roadster-line text-sm" /> Your vehicle
+            </span>
+            <div className="h-px flex-1 bg-night-line" />
           </div>
 
-          <div className="flex gap-3 mb-3">
-            <input value={vehicleColor} onChange={(e) => setVehicleColor(e.target.value)} required type="text" placeholder="Color" className={halfInputClass} />
-            <input value={vehiclePlate} onChange={(e) => setVehiclePlate(e.target.value)} required type="text" placeholder="Plate no." className={halfInputClass} />
+          <div className="mb-3 flex gap-3">
+            <input
+              value={vehicleColor}
+              onChange={(e) => setVehicleColor(e.target.value)}
+              required
+              type="text"
+              placeholder="Colour"
+              className="field-dark w-1/2"
+            />
+            <input
+              value={vehiclePlate}
+              onChange={(e) => setVehiclePlate(e.target.value)}
+              required
+              type="text"
+              placeholder="Plate number"
+              className="field-dark w-1/2"
+            />
           </div>
           <div className="flex gap-3">
-            <input value={vehicleCapacity} onChange={(e) => setVehicleCapacity(e.target.value)} required type="number" min="1" placeholder="Capacity" className={halfInputClass} />
+            <input
+              value={vehicleCapacity}
+              onChange={(e) => setVehicleCapacity(e.target.value)}
+              required
+              type="number"
+              min="1"
+              placeholder="Seats"
+              className="field-dark w-1/2"
+            />
             <select
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
               required
-              className="w-1/2 bg-[#1C1C1C] border-2 border-[#3A3A3A] rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-yellow-400 transition"
+              className={`field-dark w-1/2 ${vehicleType ? "" : "text-night-fog/50"}`}
             >
-              <option value="" disabled className="bg-[#1C1C1C]">Type</option>
-              <option value="car" className="bg-[#1C1C1C]">Car</option>
-              <option value="auto" className="bg-[#1C1C1C]">Auto</option>
-              <option value="moto" className="bg-[#1C1C1C]">Moto</option>
+              <option value="" disabled className="bg-night-soft">
+                Vehicle type
+              </option>
+              <option value="car" className="bg-night-soft text-white">
+                Car
+              </option>
+              <option value="auto" className="bg-night-soft text-white">
+                Auto
+              </option>
+              <option value="moto" className="bg-night-soft text-white">
+                Moto
+              </option>
             </select>
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="anim-field w-full bg-yellow-400 text-black font-extrabold py-4 rounded-2xl text-sm tracking-wide mt-1 active:scale-95 transition-transform"
-        >
-          Create Account
+        {error && (
+          <div className="animate-fade-in flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3">
+            <i className="ri-error-warning-line mt-0.5 text-sm text-danger" />
+            <p className="text-xs leading-relaxed font-medium text-danger">{error}</p>
+          </div>
+        )}
+
+        <button type="submit" disabled={submitting} className="btn-gold mt-1">
+          {submitting ? (
+            <>
+              <span className="spinner" /> Creating account…
+            </>
+          ) : (
+            "Create captain account"
+          )}
         </button>
 
-        <p className="anim-field text-center text-sm text-[#888888]">
+        <p className="text-center text-sm text-night-fog">
           Already a captain?{" "}
-          <Link to="/captain-login" className="text-yellow-400 font-bold">
-            Login
+          <Link to="/captain-login" className="font-bold text-gold">
+            Sign in
           </Link>
         </p>
       </form>
 
-      <p className="text-[10px] leading-tight text-[#555555] text-center mt-8">
+      <p className="mt-8 text-center text-[10px] leading-relaxed text-night-fog/60">
         Protected by reCAPTCHA · Google Privacy Policy · Terms of Service
       </p>
     </div>

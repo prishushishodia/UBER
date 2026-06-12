@@ -7,7 +7,7 @@ import axios from "axios";
 const UserProtectedWrapper = ({ children }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserDataContext);
+  const { setUser } = useContext(UserDataContext);
   const [isLoading, setIsLoading] = useState(true);
 
 
@@ -37,7 +37,12 @@ const UserProtectedWrapper = ({ children }) => {
   }, [token]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-mist">
+        <span className="text-3xl font-extrabold tracking-tight text-ink">Uber</span>
+        <span className="spinner text-fog" />
+      </div>
+    );
   }
 
   return <>{children}</>;

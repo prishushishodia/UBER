@@ -2,114 +2,141 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/userContext";
 import axios from "axios";
+import Logo from "../components/Logo";
 
 const UserLogin = () => {
-  const [email, setemail] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const { user, setUser } = useContext(UserDataContext);
+  const { setUser } = useContext(UserDataContext);
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    const userData = {
-      email: email,
-      password: password,
-    };
-
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/users/login`,
-      userData
-    );
-
-    if (response.status === 200) {
-      const data = response.data;
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-      navigate("/home");
+    setError("");
+    setSubmitting(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, {
+        email,
+        password,
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setUser(data.user);
+        localStorage.setItem("token", data.token);
+        navigate("/home");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Couldn't sign you in. Check your details and try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    setemail("");
-    setPassword("");
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F6F6] flex flex-col justify-between px-6 py-10">
-      {/* Top: logo + form */}
+    <div className="flex min-h-screen flex-col justify-between bg-mist px-6 py-10">
       <div>
-        {/* Logo */}
-        <img
-          className="w-12 mb-8"
-          src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-          alt="Uber"
-        />
+        <Logo size="lg" className="mb-9 animate-fade-in" />
 
-        <h1 className="text-2xl font-bold text-[#111] mb-1">Welcome back</h1>
-        <p className="text-[#6B7280] text-sm mb-8">Sign in to your account</p>
+        <div className="animate-fade-up" style={{ animationDelay: "80ms" }}>
+          <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-ink">Welcome back</h1>
+          <p className="mb-8 text-sm text-fog">Sign in to request your next ride</p>
+        </div>
 
-        <form onSubmit={submitHandler} className="flex flex-col gap-4">
-          {/* Email */}
+        <form
+          onSubmit={submitHandler}
+          className="animate-fade-up flex flex-col gap-4"
+          style={{ animationDelay: "160ms" }}
+        >
           <div>
-            <label className="block text-xs font-semibold text-[#6B7280] mb-1 uppercase tracking-wide">
+            <label className="form-label" htmlFor="email">
               Email
             </label>
             <input
+              id="email"
               value={email}
-              onChange={(e) => setemail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
               type="email"
-              placeholder="email@example.com"
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#111] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition shadow-sm"
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="field"
             />
           </div>
 
-          {/* Password */}
           <div>
-            <label className="block text-xs font-semibold text-[#6B7280] mb-1 uppercase tracking-wide">
+            <label className="form-label" htmlFor="password">
               Password
             </label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              type="password"
-              placeholder="Enter your password"
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#111] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black transition shadow-sm"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                className="field pr-12"
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1 text-fog transition hover:text-ink"
+              >
+                <i className={showPassword ? "ri-eye-off-line" : "ri-eye-line"} />
+              </button>
+            </div>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full bg-black text-white font-semibold py-4 rounded-2xl text-sm tracking-wide mt-2 active:scale-95 transition-transform"
-          >
-            Login
+          {error && (
+            <div className="animate-fade-in flex items-start gap-2 rounded-xl border border-danger/20 bg-danger/5 px-4 py-3">
+              <i className="ri-error-warning-line mt-0.5 text-sm text-danger" />
+              <p className="text-xs leading-relaxed font-medium text-danger">{error}</p>
+            </div>
+          )}
+
+          <button type="submit" disabled={submitting} className="btn-ink mt-1">
+            {submitting ? (
+              <>
+                <span className="spinner" /> Signing in…
+              </>
+            ) : (
+              "Sign in"
+            )}
           </button>
         </form>
 
-        <p className="text-center text-sm text-[#6B7280] mt-5">
-          New here?{" "}
-          <Link to="/signup" className="text-black font-semibold underline">
+        <p className="mt-5 animate-fade-up text-center text-sm text-fog" style={{ animationDelay: "240ms" }}>
+          New to Uber?{" "}
+          <Link to="/signup" className="font-bold text-ink underline underline-offset-2">
             Create an account
           </Link>
         </p>
 
-        {/* Test credentials */}
-        <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3">
-          <p className="text-xs font-bold text-yellow-700 mb-1">Test credentials</p>
-          <p className="text-xs text-yellow-800">ID: <span className="font-semibold">trial@gmail.com</span></p>
-          <p className="text-xs text-yellow-800">Password: <span className="font-semibold">trial1234</span></p>
+        {/* Demo credentials */}
+        <div
+          className="tile mt-6 animate-fade-up border-dashed px-4 py-3"
+          style={{ animationDelay: "300ms" }}
+        >
+          <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold tracking-wide text-fog uppercase">
+            <i className="ri-flask-line" /> Demo account
+          </p>
+          <p className="text-xs text-soot">
+            Email: <span className="font-semibold">trial@gmail.com</span> · Password:{" "}
+            <span className="font-semibold">trial1234</span>
+          </p>
         </div>
       </div>
 
-      {/* Bottom: Captain login */}
-      <div>
-        <Link
-          to="/captain-login"
-          className="w-full flex items-center justify-center gap-2 bg-[#00C853] text-white font-semibold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform"
-        >
-          <i className="ri-steering-2-line text-base"></i>
+      {/* Switch persona */}
+      <div className="mt-8 animate-fade-up" style={{ animationDelay: "360ms" }}>
+        <Link to="/captain-login" className="btn-go">
+          <i className="ri-steering-2-line text-base" />
           Sign in as Captain
         </Link>
       </div>

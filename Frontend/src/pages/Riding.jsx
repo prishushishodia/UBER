@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import LiveTracking from "../components/LiveTracking";
+import TripRoute from "../components/TripRoute";
 
 const Riding = () => {
   const location = useLocation();
@@ -14,72 +15,58 @@ const Riding = () => {
     return () => socket.off("ride-ended");
   }, []);
 
+  const captainFirstName = ride?.captain?.fullname?.firstname || "";
+  const captainLastName = ride?.captain?.fullname?.lastname || "";
+  const initials = (captainFirstName[0] || "") + (captainLastName[0] || "") || "C";
+
   return (
-    <div className="h-screen flex flex-col bg-[#F6F6F6]">
-      {/* Home button */}
-      <Link
-        to="/home"
-        className="fixed right-4 top-4 z-50 h-10 w-10 bg-white flex items-center justify-center rounded-full shadow-md"
-      >
-        <i className="text-lg text-[#111] ri-home-5-line"></i>
+    <div className="flex h-screen flex-col bg-mist">
+      {/* Home shortcut */}
+      <Link to="/home" aria-label="Back to home" className="map-action animate-fade-in fixed top-4 right-4 z-50">
+        <i className="ri-home-5-line text-lg" />
       </Link>
 
-      {/* Map — top 55% */}
-      <div className="h-[55%] w-full">
+      {/* Map fills whatever space the trip panel doesn't need */}
+      <div className="min-h-0 w-full flex-1">
         <LiveTracking />
       </div>
 
-      {/* Bottom panel — 45% */}
-      <div className="h-[45%] bg-white rounded-t-3xl shadow-2xl px-5 pt-5 pb-6 flex flex-col justify-between overflow-y-auto">
+      {/* Trip panel — natural height so all content stays visible without scrolling */}
+      <div className="sheet animate-fade-up -mt-6 flex flex-none flex-col px-5 pt-5 pb-6">
         <div>
-          <h2 className="text-lg font-bold text-[#111] mb-4">Ride Summary</h2>
+          {/* Status + heading */}
+          <span className="chip bg-go/10 text-go">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-go" />
+            On the way
+          </span>
+          <h2 className="mt-2 mb-4 text-xl font-extrabold tracking-tight text-ink">
+            Enjoy your ride{ride?.user?.fullname?.firstname ? `, ${ride.user.fullname.firstname}` : ""}
+          </h2>
 
-          {/* Ride details card */}
-          <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm">
-            {/* Pickup */}
-            <div className="flex items-start gap-3 p-4">
-              <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-                <i className="text-white text-sm ri-map-pin-fill"></i>
-              </div>
-              <div>
-                <p className="text-xs text-[#6B7280] font-medium">Pickup Point</p>
-                <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-                  {ride?.pickup}
-                </h3>
-              </div>
+          {/* Captain strip */}
+          <div className="tile mb-4 flex items-center gap-3.5 px-4 py-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-ink">
+              <span className="text-sm font-extrabold text-white uppercase">{initials}</span>
             </div>
-
-            {/* Destination */}
-            <div className="flex items-start gap-3 p-4">
-              <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
-                <i className="text-white text-sm ri-map-pin-3-line"></i>
-              </div>
-              <div>
-                <p className="text-xs text-[#6B7280] font-medium">Destination</p>
-                <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-                  {ride?.destination}
-                </h3>
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-ink capitalize">
+                {captainFirstName} {captainLastName}
+              </p>
+              <p className="text-xs text-fog">
+                {ride?.captain?.vehicle?.plate || "—"} · Your captain
+              </p>
             </div>
-
-            {/* Fare */}
-            <div className="flex items-start gap-3 p-4">
-              <div className="mt-0.5 h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                <i className="text-white text-sm ri-money-rupee-circle-line"></i>
-              </div>
-              <div>
-                <p className="text-xs text-[#6B7280] font-medium">Ride Fare</p>
-                <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-                  ₹{ride?.fare}
-                </h3>
-              </div>
-            </div>
+            <i className="ri-shield-check-fill text-lg text-go" />
           </div>
+
+          {/* Trip summary */}
+          <TripRoute pickup={ride?.pickup} destination={ride?.destination} fare={ride?.fare} />
         </div>
 
-        {/* Payment button */}
-        <button className="w-full bg-black text-white font-semibold py-4 rounded-2xl text-sm tracking-wide active:scale-95 transition-transform mt-4">
-          Payment Done
+        {/* Payment */}
+        <button className="btn-ink mt-4">
+          <i className="ri-cash-line text-base" />
+          Pay ₹{ride?.fare ?? "—"} in cash
         </button>
       </div>
     </div>

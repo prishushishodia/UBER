@@ -1,98 +1,69 @@
 import React from "react";
+import TripRoute from "./TripRoute";
 
-const WaitingForDriver = (props) => {
-  const captainFirstName = props.ride?.captain?.fullname?.firstname || "";
-  const captainLastName = props.ride?.captain?.fullname?.lastname || "";
-  const initials =
-    (captainFirstName[0] || "") + (captainLastName[0] || "") || "C";
+const WaitingForDriver = ({ ride, setWaitingForDriver }) => {
+  const captainFirstName = ride?.captain?.fullname?.firstname || "";
+  const captainLastName = ride?.captain?.fullname?.lastname || "";
+  const initials = (captainFirstName[0] || "") + (captainLastName[0] || "") || "C";
+  const otpDigits = String(ride?.otp ?? "").split("");
 
   return (
-    <div className="bg-white rounded-t-3xl px-5 pt-3 pb-6">
-      {/* Drag handle */}
-      <div
-        className="flex justify-center pb-3 cursor-pointer"
-        onClick={() => props.setWaitingForDriver(false)}
-      >
-        <div className="w-10 h-1 bg-gray-300 rounded-full" />
+    <div className="sheet px-5 pt-3 pb-6">
+      {/* Drag handle — tap to dismiss */}
+      <div className="cursor-pointer pb-3" onClick={() => setWaitingForDriver(false)}>
+        <div className="grab" />
       </div>
 
-      {/* Header */}
-      <h2 className="text-lg font-bold text-[#00C853] mb-1">
-        Your ride is confirmed!
-      </h2>
-      <p className="text-xs text-[#6B7280] mb-4">
-        Your captain is on the way to pick you up
-      </p>
+      {/* Status */}
+      <div className="mb-4">
+        <span className="chip bg-go/10 text-go">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-go opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-go" />
+          </span>
+          Captain on the way
+        </span>
+        <h2 className="mt-2 text-xl font-extrabold tracking-tight text-ink">Your ride is confirmed</h2>
+        <p className="mt-0.5 text-xs text-fog">Share the OTP with your captain to start the trip</p>
+      </div>
 
-      {/* Captain info + OTP */}
-      <div className="flex items-center justify-between bg-[#F6F6F6] rounded-2xl px-4 py-3 mb-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="h-12 w-12 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-base font-bold uppercase">
-              {initials}
+      {/* Captain card */}
+      <div className="tile mb-4 flex items-center gap-3.5 px-4 py-3.5">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-ink">
+          <span className="text-base font-extrabold text-white uppercase">{initials}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-bold text-ink capitalize">
+            {captainFirstName} {captainLastName}
+          </h3>
+          <span className="mt-1 inline-block rounded-md border border-line bg-white px-2 py-0.5 text-[11px] font-bold tracking-widest text-soot uppercase">
+            {ride?.captain?.vehicle?.plate || "—"}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-xs font-bold text-ink">
+          <i className="ri-star-fill text-gold" /> 4.8
+        </div>
+      </div>
+
+      {/* OTP — segmented digits */}
+      <div className="mb-4 rounded-2xl bg-ink p-4">
+        <p className="mb-2.5 text-center text-[10px] font-bold tracking-[0.2em] text-white/50 uppercase">
+          Your ride OTP
+        </p>
+        <div className="flex justify-center gap-2">
+          {(otpDigits.length ? otpDigits : Array(6).fill("•")).map((d, i) => (
+            <span
+              key={i}
+              className="flex h-11 w-9 items-center justify-center rounded-lg bg-white/10 text-lg font-extrabold text-white"
+            >
+              {d}
             </span>
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-[#111]">
-              {captainFirstName} {captainLastName}
-            </h3>
-            <p className="text-xs text-[#6B7280]">
-              {props.ride?.captain?.vehicle?.plate || "—"}
-            </p>
-          </div>
-        </div>
-
-        {/* OTP box */}
-        <div className="bg-black rounded-xl px-4 py-2 text-center">
-          <p className="text-[10px] text-gray-400 font-medium">OTP</p>
-          <p className="text-lg font-extrabold text-white tracking-widest leading-none">
-            {props.ride?.otp}
-          </p>
+          ))}
         </div>
       </div>
 
-      {/* Ride details */}
-      <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-[#F6F6F6] overflow-hidden shadow-sm">
-        {/* Pickup */}
-        <div className="flex items-start gap-3 p-4">
-          <div className="mt-0.5 h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-            <i className="text-white text-sm ri-map-pin-fill"></i>
-          </div>
-          <div>
-            <p className="text-xs text-[#6B7280] font-medium">Pickup</p>
-            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-              {props.ride?.pickup}
-            </h3>
-          </div>
-        </div>
-
-        {/* Destination */}
-        <div className="flex items-start gap-3 p-4">
-          <div className="mt-0.5 h-8 w-8 rounded-full bg-[#00C853] flex items-center justify-center flex-shrink-0">
-            <i className="text-white text-sm ri-map-pin-3-line"></i>
-          </div>
-          <div>
-            <p className="text-xs text-[#6B7280] font-medium">Destination</p>
-            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-              {props.ride?.destination}
-            </h3>
-          </div>
-        </div>
-
-        {/* Fare */}
-        <div className="flex items-start gap-3 p-4">
-          <div className="mt-0.5 h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-            <i className="text-white text-sm ri-money-rupee-circle-line"></i>
-          </div>
-          <div>
-            <p className="text-xs text-[#6B7280] font-medium">Ride Fare</p>
-            <h3 className="text-sm font-semibold text-[#111] mt-0.5">
-              ₹{props.ride?.fare}
-            </h3>
-          </div>
-        </div>
-      </div>
+      {/* Trip summary */}
+      <TripRoute pickup={ride?.pickup} destination={ride?.destination} fare={ride?.fare} />
     </div>
   );
 };
